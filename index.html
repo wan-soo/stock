@@ -153,9 +153,24 @@
       </div>
 
       <!-- 추천 핫 티커 (전자책 주요 다룸 종목) -->
-      <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
-        <span class="text-xs text-slate-400 font-medium mr-1"><i class="fas fa-fire text-amber-400 mr-1"></i>책 핵심 분석 기업:</span>
-        <div id="hot-tickers-container" class="flex flex-wrap gap-1.5"></div>
+      <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium mr-1"><i class="fas fa-fire text-amber-400 mr-1"></i>책 핵심 분석 기업:</span>
+          <div id="hot-tickers-container" class="flex flex-wrap gap-2"></div>
+        </div>
+        
+        <!-- 사용자가 요청한 색상 구분 범례 가이드 바 -->
+        <div class="flex flex-wrap items-center gap-2.5 text-[11px] bg-slate-950/80 px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-inner">
+          <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-yellow-200 ring-2 ring-amber-400/30"></span>
+            <span class="text-amber-300 font-black">👑 황금색: 현 시점 상승 가능성 1위 (메타)</span>
+          </span>
+          <span class="text-slate-700 hidden sm:inline">|</span>
+          <span class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-fuchsia-500 to-rose-500 border border-pink-200 ring-2 ring-pink-400/30 animate-pulse"></span>
+            <span class="text-fuchsia-300 font-black">🚀 네온자주색: 6개월 내 가장 가파른 급등 1위 (비스트라)</span>
+          </span>
+        </div>
       </div>
     </section>
 
@@ -164,10 +179,11 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         <div>
-          <div class="flex items-center space-x-3">
+          <div class="flex flex-wrap items-center gap-3">
             <h2 id="stock-name-ko" class="text-2xl sm:text-3xl font-extrabold text-white">엔비디아</h2>
             <span id="stock-name-en" class="text-sm font-semibold text-slate-400">NVIDIA Corp. (NVDA)</span>
             <span id="stock-sector-badge" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-sky-300 border border-slate-700"></span>
+            <span id="stock-special-rank-badge"></span>
           </div>
 
           <div class="flex flex-wrap items-center gap-2 mt-2">
