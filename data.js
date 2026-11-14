@@ -6,10 +6,11 @@
 const MARKET_MACRO_DATA = {
   updatedAt: "2026-11-14T15:00:00Z",
   exchangeRate: {
-    usdKrw: 1395.40,
-    change: +4.20,
-    changePct: +0.30,
-    status: "강달러 지속",
+    usdKrw: 1332.40,
+    change: -2.80,
+    changePct: -0.21,
+    yahooTicker: "KRW=X",
+    status: "달러 소폭 약세",
     analysis: "원/달러 환율 상승세로 미국 빅테크 주식 환차익 효과 발생. 단, 달러 강세 시 비미국권 매출 비중이 높은 기업의 외환 환산 손실 점검 필요."
   },
   fedRate: {
@@ -21,17 +22,19 @@ const MARKET_MACRO_DATA = {
   us10yYield: {
     current: 4.42,
     change: +0.03,
+    yahooTicker: "^TNX",
     status: "경계 구간 (4.0% ~ 4.5%)",
     discountRateImpact: "고성장주 밸류에이션(PER) 압축 압력 상존",
     analysis: "미 10년물 국채 금리는 '무위험 할인율'의 핵심 기준. 4.5% 상회 시 고PER 성장주의 미래 이익 현재가치 하락으로 주가 변동성 확대 주의 (책 10장)."
   },
   wtiOil: {
-    current: 71.20,
-    change: -0.65,
-    changePct: -0.90,
-    status: "안정 국면 ($70~$75)",
-    inflationPressure: "낮음",
-    analysis: "유가 안정으로 2차 인플레이션 재발 위험 제한적. 빅테크 데이터센터 전력 비용 및 물류비용 부담 완화 요인 (책 11장)."
+    current: 88.92,
+    change: +0.55,
+    changePct: +0.62,
+    yahooTicker: "CL=F",
+    status: "상승 국면 ($85~$90)",
+    inflationPressure: "중간",
+    analysis: "유가 상승 시 2차 인플레이션 재발 위험 점검 필요. 빅테크 데이터센터 전력 비용 및 물류비용 부담 요인 (책 11장)."
   },
   fearGreedIndex: {
     score: 41,
@@ -42,9 +45,10 @@ const MARKET_MACRO_DATA = {
     analysis: "지수가 41로 '공포' 영역에 위치. 대중의 심리가 위축된 상태이나 아직 책에서 제시한 20 이하의 '극단적 공포(Extreme Fear) 황금 매수 타점' 직전 관망 및 1차 준비 단계 (책 12장)."
   },
   indices: {
-    sp500: { current: 5930.50, changePct: +0.25 },
-    nasdaq100: { current: 20920.10, changePct: +0.42 },
-    qld: { current: 104.50, changePct: +0.85, note: "나스닥 2배 레버리지 (개별 종목 레버리지 지양, 시장 전체 지수 레버리지 원칙)" }
+    sp500:   { current: 7561.67, changePct: +0.25, yahooTicker: "^GSPC", nameKo: "S&P 500" },
+    nasdaq:  { current: 25136.27, changePct: +0.42, yahooTicker: "^IXIC", nameKo: "나스닥 종합" },
+    soxl:    { current: 58.32, changePct: +1.20, yahooTicker: "SOXL", nameKo: "SOXL (반도체3X)" },
+    tqqq:    { current: 58.08, changePct: +0.95, yahooTicker: "TQQQ", nameKo: "TQQQ (나스닥3X)" }
   }
 };
 

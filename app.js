@@ -21,7 +21,178 @@ document.addEventListener("DOMContentLoaded", () => {
   initPortfolioCalculator();
   initChecklist();
   loadStockDashboard(currentTicker);
+  // 실시간 글로벌 시장 지표 대시보드 최초 로딩
+  refreshLiveMarketData();
 });
+
+/**
+ * ============================================================
+ * 실시간 글로벌 시장 지표 Yahoo Finance 연동 엔진
+ * 환율(USD/KRW), WTI 유가, 10년물 금리, S&P500, 나스닥, SOXL, TQQQ
+ * ============================================================
+ */
+
+// Yahoo Finance v8 chart API를 CORS 프록시를 통해 호출
+async function fetchYahooQuote(symbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
+  const proxies = [
+    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+  for (const proxyUrl of proxies) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 4000);
+      const res = await fetch(proxyUrl, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (!res.ok) continue;
+      const json = await res.json();
+      const meta = json?.chart?.result?.[0]?.meta;
+      if (!meta || !meta.regularMarketPrice) continue;
+      const price = meta.regularMarketPrice;
+      const prev  = meta.chartPreviousClose || meta.previousClose || price;
+      const chg   = price - prev;
+      const chgP  = prev !== 0 ? (chg / prev) * 100 : 0;
+      return {
+        symbol,
+        price: parseFloat(price.toFixed(2)),
+        change: parseFloat(chg.toFixed(2)),
+        changePct: parseFloat(chgP.toFixed(2)),
+        currency: meta.currency || "USD"
+      };
+    } catch (e) { /* try next proxy */ }
+  }
+  return null;
+}
+
+// 모든 시장 지표를 병렬로 일괄 조회
+async function refreshLiveMarketData() {
+  const statusEl = document.getElementById("live-market-status");
+  const sourceEl = document.getElementById("live-market-source");
+  const timeEl   = document.getElementById("live-market-time");
+
+  // 로딩 상태 표시
+  if (statusEl) {
+    statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>연동 중...</span>`;
+    statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono";
+  }
+
+  const symbols = {
+    krw:    "KRW=X",
+    oil:    "CL=F",
+    tnx:    "^TNX",
+    sp500:  "^GSPC",
+    nasdaq: "^IXIC",
+    soxl:   "SOXL",
+    tqqq:   "TQQQ"
+  };
+
+  // 병렬 호출
+  const results = {};
+  const promises = Object.entries(symbols).map(async ([key, sym]) => {
+    results[key] = await fetchYahooQuote(sym);
+  });
+  await Promise.allSettled(promises);
+
+  const now = new Date().toLocaleTimeString("ko-KR", { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  let successCount = 0;
+
+  // 각 카드 업데이트 헬퍼
+  function updateCard(key, formatValue, dotId) {
+    const data = results[key];
+    const dot = document.getElementById(dotId);
+    if (!data) {
+      if (dot) dot.className = "fas fa-circle text-[6px] text-slate-600";
+      return false;
+    }
+    if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
+    successCount++;
+
+    const valEl = document.getElementById(`live-val-${key}`);
+    const chgEl = document.getElementById(`live-chg-${key}`);
+    if (valEl) valEl.innerText = formatValue(data);
+    if (chgEl) {
+      const isUp = data.changePct >= 0;
+      chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+      chgEl.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(data.changePct).toFixed(2)}%`;
+    }
+    return true;
+  }
+
+  // 1. 환율
+  updateCard("krw", d => `₩${d.price.toLocaleString(undefined,{maximumFractionDigits:1})}`, "live-dot-krw");
+  // 환율은 상단 헤더에도 동기화
+  if (results.krw) {
+    MARKET_MACRO_DATA.exchangeRate.usdKrw = results.krw.price;
+    MARKET_MACRO_DATA.exchangeRate.changePct = results.krw.changePct;
+    initMacroHeader(); // 상단 헤더 갱신
+  }
+
+  // 2. WTI 유가
+  updateCard("oil", d => `$${d.price.toFixed(2)}`, "live-dot-oil");
+  if (results.oil) {
+    MARKET_MACRO_DATA.wtiOil.current = results.oil.price;
+    MARKET_MACRO_DATA.wtiOil.changePct = results.oil.changePct;
+  }
+
+  // 3. 10년물 금리 (^TNX 는 값이 % 단위로 오는 경우 그대로, 아닐 경우 환산)
+  if (results.tnx) {
+    const yieldVal = results.tnx.price > 20 ? results.tnx.price / 10 : results.tnx.price; // ^TNX 가끔 44.2 로 올 때
+    const valEl = document.getElementById("live-val-10y");
+    const chgEl = document.getElementById("live-chg-10y");
+    const dot   = document.getElementById("live-dot-10y");
+    if (valEl) valEl.innerText = `${yieldVal.toFixed(2)}%`;
+    if (chgEl) {
+      const isUp = results.tnx.changePct >= 0;
+      chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`; // 금리 상승=경고
+      chgEl.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(results.tnx.changePct).toFixed(2)}%`;
+    }
+    if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
+    MARKET_MACRO_DATA.us10yYield.current = yieldVal;
+    successCount++;
+  }
+
+  // 4. S&P 500
+  updateCard("sp500", d => d.price.toLocaleString(undefined,{maximumFractionDigits:2}), "live-dot-sp500");
+  if (results.sp500) MARKET_MACRO_DATA.indices.sp500.current = results.sp500.price;
+
+  // 5. 나스닥 종합
+  updateCard("nasdaq", d => d.price.toLocaleString(undefined,{maximumFractionDigits:0}), "live-dot-nasdaq");
+  if (results.nasdaq) MARKET_MACRO_DATA.indices.nasdaq.current = results.nasdaq.price;
+
+  // 6. SOXL
+  updateCard("soxl", d => `$${d.price.toFixed(2)}`, "live-dot-soxl");
+  if (results.soxl) MARKET_MACRO_DATA.indices.soxl.current = results.soxl.price;
+
+  // 7. TQQQ
+  updateCard("tqqq", d => `$${d.price.toFixed(2)}`, "live-dot-tqqq");
+  if (results.tqqq) MARKET_MACRO_DATA.indices.tqqq.current = results.tqqq.price;
+
+  // 최종 상태 업데이트
+  if (successCount >= 5) {
+    if (statusEl) {
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span><span>실시간 연동 (${successCount}/7)</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono";
+    }
+    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 연동 성공 (${successCount}/7 지표)`;
+  } else if (successCount > 0) {
+    if (statusEl) {
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>부분 연동 (${successCount}/7)</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono";
+    }
+    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 부분 연동 (${successCount}/7) — 일부 지표는 최근 검증 DB 기준`;
+  } else {
+    if (statusEl) {
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span><span>오프라인 (검증 DB)</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono";
+    }
+    if (sourceEl) sourceEl.innerText = "📡 실시간 연동 실패 — 검증된 최신 시장 종가 DB 기준 표시 중";
+  }
+  if (timeEl) timeEl.innerText = `마지막 갱신: ${now}`;
+}
+// window에 노출 (HTML onclick에서 호출)
+window.refreshLiveMarketData = refreshLiveMarketData;
 
 /**
  * 상단 거시경제 헤더 바 초기화
@@ -32,11 +203,13 @@ function initMacroHeader() {
   // 환율
   const elExchange = document.getElementById("macro-exchange");
   if (elExchange) {
+    const exChgPct = macro.exchangeRate.changePct;
+    const exColor = exChgPct >= 0 ? 'text-emerald-400' : 'text-rose-400';
     elExchange.innerHTML = `
       <div class="flex items-center space-x-1">
         <span class="text-xs text-slate-400">USD/KRW</span>
-        <span class="font-bold text-sm text-slate-100">${macro.exchangeRate.usdKrw.toLocaleString()}원</span>
-        <span class="text-xs text-emerald-400 font-semibold">+${macro.exchangeRate.change} (${macro.exchangeRate.changePct}%)</span>
+        <span class="font-bold text-sm text-slate-100">${macro.exchangeRate.usdKrw.toLocaleString(undefined,{maximumFractionDigits:1})}원</span>
+        <span class="text-xs ${exColor} font-semibold">${exChgPct >= 0 ? '+' : ''}${exChgPct.toFixed(2)}%</span>
       </div>
     `;
   }
@@ -69,11 +242,13 @@ function initMacroHeader() {
   // WTI 유가
   const elOil = document.getElementById("macro-oil");
   if (elOil) {
+    const oilChg = macro.wtiOil.changePct;
+    const oilColor = oilChg >= 0 ? 'text-rose-400' : 'text-emerald-400'; // 유가 상승=경고
     elOil.innerHTML = `
       <div class="flex items-center space-x-1">
         <span class="text-xs text-slate-400">WTI 유가</span>
         <span class="font-bold text-sm text-slate-100">$${macro.wtiOil.current}</span>
-        <span class="text-xs text-emerald-400 font-semibold">${macro.wtiOil.changePct}%</span>
+        <span class="text-xs ${oilColor} font-semibold">${oilChg >= 0 ? '+' : ''}${oilChg}%</span>
       </div>
     `;
   }
