@@ -193,15 +193,18 @@
             <span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-medium">
               <i class="fas fa-pie-chart mr-1"></i>저자 포트폴리오 비중: <span id="stock-portfolio-share">30%</span>
             </span>
-            <span id="chart-cutoff-tag"></span>
+            <span id="stock-live-badge"></span>
           </div>
         </div>
 
         <!-- 가격 & 밸류에이션 요약 -->
         <div class="flex flex-wrap items-end gap-6 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div>
-            <div class="text-[11px] text-slate-400">현재 실시간 주가</div>
-            <div class="text-2xl sm:text-3xl font-black text-white tracking-tight" id="stock-current-price">$148.50</div>
+            <div class="flex items-center justify-between gap-2 text-[11px] text-slate-400 mb-0.5">
+              <span>현재 주가</span>
+              <span id="price-source-tag" class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">검증 DB 기준</span>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-white tracking-tight" id="stock-current-price">$162.85</div>
             <div id="stock-price-change" class="text-xs font-semibold"></div>
           </div>
 

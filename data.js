@@ -96,18 +96,18 @@ const STOCKS_DATABASE = {
     sector: "AI 가속기 / GPU 반도체 독점",
     chapter: "2장. 엔비디아 독주 시대, 1등 기업의 왕좌는 언제까지 유지될까?",
     authorPortfolioShare: "30% (정기 적립 투자 핵심 종목)",
-    currentPrice: 148.50,
-    change: +2.15,
-    changePct: +1.47,
-    marketCap: "3.65T",
-    peRatio: 45.8,
-    forwardPE: 33.2,
-    psRatio: 28.5,
-    week52High: 153.10,
+    currentPrice: 162.85,
+    change: +2.45,
+    changePct: +1.53,
+    marketCap: "3.95T",
+    peRatio: 48.2,
+    forwardPE: 34.5,
+    psRatio: 30.2,
+    week52High: 168.50,
     week52Low: 75.60,
-    targetPriceBase: 185.00,
-    targetPriceBull: 220.00,
-    targetPriceBear: 120.00,
+    targetPriceBase: 195.00,
+    targetPriceBull: 235.00,
+    targetPriceBear: 130.00,
     financials: {
       period: "최근 공시 분기 (FY2026 Q3)",
       revenue: "$35.08B",
@@ -171,18 +171,18 @@ const STOCKS_DATABASE = {
     sector: "전기차 · 자율주행(FSD) · 로보택시 · 로봇",
     chapter: "3장. 테슬라, 단순한 전기차를 넘어 AI·로봇 제국으로 도약할 수 있을까?",
     authorPortfolioShare: "30% (장기 모빌리티/AI 플랫폼 배팅)",
-    currentPrice: 342.20,
-    change: +5.80,
-    changePct: +1.72,
-    marketCap: "1.10T",
-    peRatio: 79.2,
-    forwardPE: 63.5,
-    psRatio: 11.2,
-    week52High: 360.50,
+    currentPrice: 390.22,
+    change: +12.35,
+    changePct: +3.27,
+    marketCap: "1.25T",
+    peRatio: 98.4,
+    forwardPE: 72.0,
+    psRatio: 12.8,
+    week52High: 488.54,
     week52Low: 138.80,
-    targetPriceBase: 410.00,
-    targetPriceBull: 540.00,
-    targetPriceBear: 230.00,
+    targetPriceBase: 440.00,
+    targetPriceBull: 550.00,
+    targetPriceBear: 280.00,
     financials: {
       period: "최근 공시 분기 (2026 Q3)",
       revenue: "$25.18B",
@@ -246,18 +246,18 @@ const STOCKS_DATABASE = {
     sector: "엔터프라이즈 AI 플랫폼(AIP) 독점",
     chapter: "5장. 팔란티어, AI 소프트웨어는 어떻게 진짜 돈을 쓸어담는가?",
     authorPortfolioShare: "포트폴리오 위성 종목 (2~3개월 주기 묵직한 분할 매수)",
-    currentPrice: 65.40,
-    change: +3.20,
-    changePct: +5.14,
-    marketCap: "148.2B",
-    peRatio: 102.5,
-    forwardPE: 68.4,
-    psRatio: 48.2,
-    week52High: 68.90,
-    week52Low: 19.80,
-    targetPriceBase: 82.00,
-    targetPriceBull: 110.00,
-    targetPriceBear: 44.00,
+    currentPrice: 170.50,
+    change: +4.80,
+    changePct: +2.90,
+    marketCap: "385.0B",
+    peRatio: 115.0,
+    forwardPE: 82.0,
+    psRatio: 52.0,
+    week52High: 182.00,
+    week52Low: 19.50,
+    targetPriceBase: 195.00,
+    targetPriceBull: 240.00,
+    targetPriceBear: 120.00,
     financials: {
       period: "최근 공시 분기 (2026 Q3)",
       revenue: "$725.5M",
@@ -313,18 +313,18 @@ const STOCKS_DATABASE = {
     sector: "맞춤형 AI 가속기(XPU) & 네트워크",
     chapter: "2부 AI 반도체 & 인프라 다크호스",
     authorPortfolioShare: "고성장 배당+AI 성장 복합 종목",
-    currentPrice: 168.20,
-    change: +3.40,
-    changePct: +2.06,
-    marketCap: "786.5B",
-    peRatio: 36.2,
-    forwardPE: 25.4,
-    psRatio: 15.6,
-    week52High: 185.16,
-    week52Low: 93.50,
-    targetPriceBase: 205.00,
-    targetPriceBull: 245.00,
-    targetPriceBear: 135.00,
+    currentPrice: 347.01,
+    change: +7.20,
+    changePct: +2.12,
+    marketCap: "1.63T",
+    peRatio: 38.5,
+    forwardPE: 26.5,
+    psRatio: 18.2,
+    week52High: 355.00,
+    week52Low: 128.50,
+    targetPriceBase: 390.00,
+    targetPriceBull: 450.00,
+    targetPriceBear: 280.00,
     financials: {
       period: "최근 공시 분기",
       revenue: "$13.07B",
@@ -376,18 +376,18 @@ const STOCKS_DATABASE = {
     sector: "글로벌 파운드리 1위 반도체 제조 독점",
     chapter: "1장 AI 밸류체인 제조의 절대 심장",
     authorPortfolioShare: "글로벌 AI 제조 파운드리 필수 편입",
-    currentPrice: 192.50,
-    change: +2.80,
-    changePct: +1.48,
-    marketCap: "998.0B",
-    peRatio: 26.8,
-    forwardPE: 20.5,
-    psRatio: 11.4,
-    week52High: 205.84,
-    week52Low: 98.20,
-    targetPriceBase: 235.00,
-    targetPriceBull: 275.00,
-    targetPriceBear: 160.00,
+    currentPrice: 398.73,
+    change: +8.50,
+    changePct: +2.18,
+    marketCap: "1.03T",
+    peRatio: 31.0,
+    forwardPE: 23.5,
+    psRatio: 13.5,
+    week52High: 410.00,
+    week52Low: 118.00,
+    targetPriceBase: 450.00,
+    targetPriceBull: 520.00,
+    targetPriceBear: 310.00,
     financials: {
       period: "최근 공시 분기",
       revenue: "$23.50B",
@@ -439,18 +439,18 @@ const STOCKS_DATABASE = {
     sector: "AI 데이터센터 원자력/전력 생산 독점",
     chapter: "8장. AI의 가장 치명적인 약점, '전력 폭증'에서 잭팟을 터뜨릴 기업들",
     authorPortfolioShare: "AI 전력 인프라 슈퍼사이클 핵심 종목",
-    currentPrice: 132.40,
-    change: +4.60,
-    changePct: +3.60,
-    marketCap: "45.8B",
-    peRatio: 31.5,
-    forwardPE: 19.8,
-    psRatio: 2.8,
-    week52High: 143.86,
+    currentPrice: 134.02,
+    change: +3.80,
+    changePct: +2.92,
+    marketCap: "46.2B",
+    peRatio: 32.5,
+    forwardPE: 24.0,
+    psRatio: 3.1,
+    week52High: 156.00,
     week52Low: 32.50,
-    targetPriceBase: 168.00,
-    targetPriceBull: 210.00,
-    targetPriceBear: 95.00,
+    targetPriceBase: 175.00,
+    targetPriceBull: 220.00,
+    targetPriceBear: 105.00,
     financials: {
       period: "최근 공시 분기",
       revenue: "$4.85B",
@@ -491,6 +491,335 @@ const STOCKS_DATABASE = {
         title: "비스트라, 미국 동부 데이터센터 클러스터에 20년 원전 전력 공급 PPA 계약 타결",
         sentiment: "positive",
         summary: "고정 마진 장기 전력 공급 계약으로 향후 10년간 폭발적인 현금흐름 창출 담보."
+      }
+    ]
+  },
+
+  "META": {
+    ticker: "META",
+    nameKo: "메타",
+    nameEn: "Meta Platforms Inc.",
+    sector: "AI 생성형 광고 및 오픈소스 LLaMA 생태계 독점",
+    chapter: "7장. 잉여현금흐름(FCF)의 제왕, 메타의 AI 광고 대전환",
+    authorPortfolioShare: "책 분석 1순위 (저평가 고성장 FCF 제왕)",
+    currentPrice: 641.69,
+    change: +6.85,
+    changePct: +1.08,
+    marketCap: "1.62T",
+    peRatio: 27.2,
+    forwardPE: 21.8,
+    psRatio: 9.8,
+    week52High: 655.00,
+    week52Low: 465.00,
+    targetPriceBase: 750.00,
+    targetPriceBull: 880.00,
+    targetPriceBear: 540.00,
+    financials: {
+      period: "최근 공시 분기 (FY2026 Q3)",
+      revenue: "$40.59B",
+      revenueYoY: "+19.0%",
+      datacenterRev: "광고 단가 +12% & 노출수 +14% (P×Q 동반 성장)",
+      operatingIncome: "$17.35B",
+      operatingMargin: "42.7%",
+      netIncome: "$15.69B",
+      netMargin: "38.6% (빅테크 최고 수준 실질 순익률)",
+      eps: "$6.03",
+      epsConsensus: "$5.25",
+      epsSurprise: "+14.8% (어닝 서프라이즈)",
+      operatingCashFlow: "$24.70B",
+      freeCashFlow: "$15.52B (FCF 마진 38.2%)",
+      capEx: "$9.18B (AI 클러스터 및 데이터센터 인프라)",
+      guidance: "생성형 AI 추천 엔진 광고 전환율 35% 상승으로 차기 분기 매출 가이던스 상향"
+    },
+    bookAnalysis: {
+      moat: "전 세계 32억 명이 매일 사용하는 패밀리 앱(인스타그램, 페이스북, 왓츠앱)의 독점적 네트워크 효과와 오픈소스 LLaMA를 통한 글로벌 AI 생태계 장악.",
+      keyCatalysts: [
+        "AI 광고 단가와 노출수의 동반 폭증(P×Q 효과)으로 수백억 달러 AI CapEx를 자체 실적으로 즉시 완충",
+        "LLaMA 4 공개로 폐쇄형 모델 진영을 무력화하고 업계 인프라 표준화 주도",
+        "막대한 분기 155억 달러 잉여현금흐름(FCF)을 바탕으로 한 적극적 자사주 매입 및 배당"
+      ],
+      keyRisks: [
+        "리얼리티 랩스(메타버스/VR) 부문의 분기 40억 달러 적자 지속",
+        "글로벌 빅테크 규제 당국의 개인정보 및 알고리즘 타겟팅 조사"
+      ],
+      fiveStepScore: {
+        moatScore: 96,
+        financialScore: 98,
+        macroResilienceScore: 92,
+        valuationScore: 88,
+        finalAction: "강력 매수 (현 시점 상승 가능성 1위: 빅테크 최저 PER + 독보적 FCF)",
+        actionBadge: "STRONG_BUY",
+        authorComment: "책 7장에서 강조한 저평가 FCF 제왕. 빅테크 중 밸류에이션(PER 27배)이 가장 매력적이며 실질 현금흐름으로 AI 인프라를 지탱하는 1순위 주식."
+      }
+    },
+    news: [
+      {
+        date: "2026-11-14",
+        title: "메타, LLaMA 4 멀티모달 상용화 임박... 글로벌 AI 광고 전환 효율 35% 급증",
+        sentiment: "positive",
+        summary: "자체 AI 광고 생성 엔진이 광고주 ROI를 극대화하며 4분기 사상 최대 실적 예고."
+      },
+      {
+        date: "2026-11-13",
+        title: "월가 분석 '메타는 AI 투자 사이클에서 가장 확실하게 현금을 회수하고 있는 유일한 기업'",
+        sentiment: "positive",
+        summary: "분기 FCF 155억 달러의 압도적 체력으로 AI 인프라 투자 비용을 자체 상쇄 중."
+      }
+    ]
+  },
+
+  "MSFT": {
+    ticker: "MSFT",
+    nameKo: "마이크로소프트",
+    nameEn: "Microsoft Corp.",
+    sector: "기업용 클라우드(Azure) & 코파일럿 독점",
+    chapter: "4장. 오픈AI를 등에 업은 마이크로소프트의 영토 확장",
+    authorPortfolioShare: "안정성 최우선 AI 플랫폼 핵심주",
+    currentPrice: 523.88,
+    change: +4.20,
+    changePct: +0.81,
+    marketCap: "3.89T",
+    peRatio: 36.2,
+    forwardPE: 29.5,
+    psRatio: 14.8,
+    week52High: 535.00,
+    week52Low: 395.00,
+    targetPriceBase: 580.00,
+    targetPriceBull: 650.00,
+    targetPriceBear: 440.00,
+    financials: {
+      period: "최근 공시 분기",
+      revenue: "$65.59B",
+      revenueYoY: "+16.0%",
+      datacenterRev: "Azure 클라우드 성장률 +33% (AI 기여도 12%p)",
+      operatingIncome: "$30.55B",
+      operatingMargin: "46.6%",
+      netIncome: "$24.67B",
+      netMargin: "37.6%",
+      eps: "$3.30",
+      epsConsensus: "$3.10",
+      epsSurprise: "+6.5%",
+      operatingCashFlow: "$34.20B",
+      freeCashFlow: "$19.30B",
+      capEx: "$14.90B (글로벌 AI 데이터센터 확장)",
+      guidance: "기업용 코파일럿 유료 구독자 수 2배 이상 성장세 지속"
+    },
+    bookAnalysis: {
+      moat: "윈도우/오피스 365의 전 세계 기업 워크스페이스 독점과 Azure 클라우드의 확고한 2위 지배력. 엔터프라이즈 전환 비용(Switching Cost) 최고 수준.",
+      keyCatalysts: [
+        "M365 코파일럿(월 $30) 기업 도입 가속화로 고마진 반복 소프트웨어 매출 폭증",
+        "오픈AI와의 독점적 파트너십을 통한 기업용 생성형 AI 솔루션 장악",
+        "컨스텔레이션 에너지와의 스리마일 원전 20년 장기 전력 PPA 계약으로 전력 리스크 선제 해결"
+      ],
+      keyRisks: ["대규모 AI 서버 증설에 따른 감가상각비 증가 및 오픈AI 의존도"],
+      fiveStepScore: {
+        moatScore: 97,
+        financialScore: 96,
+        macroResilienceScore: 89,
+        valuationScore: 80,
+        finalAction: "우량주 적립 매수 (AI 시대 가장 안전하고 견고한 기업용 인프라)",
+        actionBadge: "BUY",
+        authorComment: "기업용 소프트웨어 시장에서 대체 불가능한 경제적 해자를 보유한 AI 시대의 안전자산."
+      }
+    },
+    news: [
+      {
+        date: "2026-11-14",
+        title: "마이크로소프트 Azure 클라우드 AI 매출 비중 40% 돌파... 분기 사상 최대",
+        sentiment: "positive",
+        summary: "포춘 500대 기업의 85% 이상이 Azure OpenAI 서비스를 정식 채택하며 기업용 AI 시장 독점."
+      }
+    ]
+  },
+
+  "AMZN": {
+    ticker: "AMZN",
+    nameKo: "아마존",
+    nameEn: "Amazon.com Inc.",
+    sector: "클라우드(AWS) 1위 & AI 물류/이커머스 독점",
+    chapter: "6장. AWS와 AI 물류의 결합, 아마존의 재도약",
+    authorPortfolioShare: "글로벌 클라우드 1위 핵심 자산",
+    currentPrice: 266.66,
+    change: +3.10,
+    changePct: +1.18,
+    marketCap: "2.78T",
+    peRatio: 42.0,
+    forwardPE: 33.0,
+    psRatio: 4.5,
+    week52High: 275.00,
+    week52Low: 168.00,
+    targetPriceBase: 310.00,
+    targetPriceBull: 360.00,
+    targetPriceBear: 220.00,
+    financials: {
+      period: "최근 공시 분기",
+      revenue: "$158.88B",
+      revenueYoY: "+11.0%",
+      datacenterRev: "AWS 클라우드 매출 $27.45B (+19.0% YoY)",
+      operatingIncome: "$17.41B",
+      operatingMargin: "11.0% (수익성 대폭 개선)",
+      netIncome: "$15.33B",
+      netMargin: "9.65%",
+      eps: "$1.43",
+      epsConsensus: "$1.14",
+      epsSurprise: "+25.4%",
+      operatingCashFlow: "$28.50B",
+      freeCashFlow: "$11.20B (FCF 턴어라운드)",
+      capEx: "$17.30B",
+      guidance: "AWS AI 연간 가동 매출(Run-rate) 100억 달러 돌파 예상"
+    },
+    bookAnalysis: {
+      moat: "글로벌 클라우드 시장 점유율 1위(AWS)의 규모의 경제와 북미 이커머스·물류 네트워크의 압도적 독점 장벽.",
+      keyCatalysts: [
+        "자체 AI 가속기 트레이니움(Trainium) 2세대 대량 배치로 AWS 클라우드 원가 대폭 절감",
+        "물류 창고 내 로봇 자동화(Proteus) 확대로 물류 비용 극적 축소 및 영업이익률 상승",
+        "고마진 광고 사업 부문의 분기 140억 달러 돌파"
+      ],
+      keyRisks: ["소매 경기 둔화 시 전자상거래 성장세 감속"],
+      fiveStepScore: {
+        moatScore: 95,
+        financialScore: 92,
+        macroResilienceScore: 88,
+        valuationScore: 82,
+        finalAction: "적극 매수 (AWS 가속화 + AI 물류 혁신 턴어라운드)",
+        actionBadge: "BUY",
+        authorComment: "클라우드 1위 지위와 물류 자동화 마진 개선이 맞물려 역대 최대 영업이익을 기록 중인 거인."
+      }
+    },
+    news: [
+      {
+        date: "2026-11-13",
+        title: "AWS, 차세대 AI 트레이니움2 칩 대규모 클러스터 가동 개시... 고객사 비용 40% 절감",
+        sentiment: "positive",
+        summary: "앤트로픽 및 주요 스타트업들이 AWS 독자 칩을 채택하며 엔비디아 의존도 완화 및 마진 확대."
+      }
+    ]
+  },
+
+  "GOOGL": {
+    ticker: "GOOGL",
+    nameKo: "알파벳 (구글)",
+    nameEn: "Alphabet Inc.",
+    sector: "AI 검색 & 제미나이(Gemini) 풀스택 인프라",
+    chapter: "2부 빅테크 풀스택 AI 패권 경쟁",
+    authorPortfolioShare: "가장 저렴한 밸류에이션의 AI 거인",
+    currentPrice: 295.77,
+    change: +2.80,
+    changePct: +0.96,
+    marketCap: "3.65T",
+    peRatio: 25.5,
+    forwardPE: 20.2,
+    psRatio: 8.5,
+    week52High: 305.00,
+    week52Low: 150.00,
+    targetPriceBase: 340.00,
+    targetPriceBull: 390.00,
+    targetPriceBear: 245.00,
+    financials: {
+      period: "최근 공시 분기",
+      revenue: "$88.27B",
+      revenueYoY: "+15.1%",
+      datacenterRev: "구글 클라우드(GCP) 매출 $11.35B (+35.0% YoY)",
+      operatingIncome: "$28.52B",
+      operatingMargin: "32.3%",
+      netIncome: "$26.30B",
+      netMargin: "29.8% (초우량 순수익률)",
+      eps: "$2.12",
+      epsConsensus: "$1.85",
+      epsSurprise: "+14.6%",
+      operatingCashFlow: "$30.70B",
+      freeCashFlow: "$17.60B",
+      capEx: "$13.10B",
+      guidance: "검색 AI Overviews 도입 후 검색 쿼리 사용량 및 광고 수익 동반 증가"
+    },
+    bookAnalysis: {
+      moat: "글로벌 검색 점유율 90% 독점, 유튜브 25억 사용자, 안드로이드 모바일 OS, 독자 6세대 TPU 반도체부터 제미나이 모델까지 아우르는 완벽한 수직 계열화.",
+      keyCatalysts: [
+        "구글 클라우드(GCP) 영업이익률 11% 돌파하며 본격적 마진 확대 사이클 진입",
+        "자체 텐서 프로세서(TPU v6 Trillium)로 외부 칩 의존 없이 최저 비용으로 대규모 모델 구동",
+        "웨이모(Waymo) 무인 로보택시 주당 유료 탑승 15만 건 돌파하며 자율주행 상용화 선도"
+      ],
+      keyRisks: ["미 법무부(DOJ) 검색 반독점 소송 및 크롬/안드로이드 분할 압박"],
+      fiveStepScore: {
+        moatScore: 96,
+        financialScore: 96,
+        macroResilienceScore: 90,
+        valuationScore: 91,
+        finalAction: "강력 매수 (빅테크 중 가장 밸류에이션이 저평가된 풀스택 AI 제왕)",
+        actionBadge: "STRONG_BUY",
+        authorComment: "반독점 노이즈로 밸류에이션(PER 25배)이 가장 낮게 억눌려 있어 안전마진이 가장 큰 AI 풀스택 리더."
+      }
+    },
+    news: [
+      {
+        date: "2026-11-14",
+        title: "구글 제미나이 2.0 울트라 공개... 멀티모달 벤치마크 전 부문 1위 석권",
+        sentiment: "positive",
+        summary: "자체 TPU 클러스터로 학습 원가를 50% 절감하며 AI 오버뷰 검색 상용화 전면 확대."
+      }
+    ]
+  },
+
+  "AAPL": {
+    ticker: "AAPL",
+    nameKo: "애플",
+    nameEn: "Apple Inc.",
+    sector: "온디바이스 AI 인텔리전스 & 22억 활성 기기 생태계",
+    chapter: "9장. 애플 인텔리전스와 온디바이스 AI의 역습",
+    authorPortfolioShare: "글로벌 1위 디바이스 락인 생태계",
+    currentPrice: 356.27,
+    change: +1.90,
+    changePct: +0.54,
+    marketCap: "5.40T",
+    peRatio: 34.2,
+    forwardPE: 28.5,
+    psRatio: 10.2,
+    week52High: 365.00,
+    week52Low: 165.00,
+    targetPriceBase: 395.00,
+    targetPriceBull: 440.00,
+    targetPriceBear: 300.00,
+    financials: {
+      period: "최근 공시 분기",
+      revenue: "$94.93B",
+      revenueYoY: "+6.1%",
+      datacenterRev: "고마진 서비스 부문(애플케어, 앱스토어, 클라우드) $24.97B (+12%)",
+      operatingIncome: "$29.59B",
+      operatingMargin: "31.2%",
+      netIncome: "$24.73B",
+      netMargin: "26.0%",
+      eps: "$1.64",
+      epsConsensus: "$1.60",
+      epsSurprise: "+2.5%",
+      operatingCashFlow: "$26.80B",
+      freeCashFlow: "$23.90B (압도적 현금 제조기)",
+      capEx: "$2.90B",
+      guidance: "애플 인텔리전스 글로벌 언어 확대로 2026~2027 슈퍼 사이클 진입"
+    },
+    bookAnalysis: {
+      moat: "22억 대의 활성 디바이스 생태계, 독자 실리콘(M시리즈/A시리즈) 뉴럴 엔진, 고객 충성도 95% 이상의 막강한 락인(Lock-in) 효과.",
+      keyCatalysts: [
+        "애플 인텔리전스 지원 모델(아이폰 16 Pro 이상) 교체 수요에 따른 사상 최대 슈퍼사이클",
+        "고마진 서비스 부문 매출 비중 26% 돌파 및 사상 최대 영업이익률",
+        "연간 1,000억 달러 이상의 천문학적 자사주 매입을 통한 주당순이익(EPS) 지속 견인"
+      ],
+      keyRisks: ["중국 시장 내 로컬 스마트폰(화웨이 등) 경쟁 심화 및 AI 기능 언어별 지원 지연"],
+      fiveStepScore: {
+        moatScore: 98,
+        financialScore: 97,
+        macroResilienceScore: 92,
+        valuationScore: 76,
+        finalAction: "우량 배당 적립 매수 (역대 최대 현금흐름과 독점 디바이스 생태계)",
+        actionBadge: "BUY",
+        authorComment: "AI 서비스가 결국 소비자에게 닿는 최종 게이트웨이. 온디바이스 AI 시대의 궁극적 수혜자."
+      }
+    },
+    news: [
+      {
+        date: "2026-11-13",
+        title: "애플 인텔리전스 지원 신규 모델 교체 수요 급증... 4분기 아이폰 매출 역대 최고치 경신 전망",
+        sentiment: "positive",
+        summary: "온디바이스 개인 맞춤형 AI 기능이 호평받으며 글로벌 스마트폰 교체 사이클 가속."
       }
     ]
   }
@@ -681,60 +1010,70 @@ function generateDynamicStockProfile(query, inferredTicker) {
 /**
  * 6개월 과거 주가 생성기 + 향후 1년 예상 주가 시나리오 생성 함수
  */
-function generateHistoricalAndFutureData(ticker) {
-  const stock = STOCKS_DATABASE[ticker];
+function generateHistoricalAndFutureData(ticker, customStock) {
+  const stock = customStock || STOCKS_DATABASE[ticker] || lookupOrGenerateStock(ticker);
   if (!stock) return null;
 
   const currentPrice = stock.currentPrice;
-  const dates = [];
-  const actualPrices = [];
-  const actualVolumes = [];
-  
-  // 지난 120영업일 (약 6개월) 시뮬레이션
-  const baseDate = new Date("2026-11-14");
-  const historyDays = 120;
-  
-  let p = currentPrice * 0.78;
-  if (ticker === 'AAPL') p = currentPrice * 0.95;
-  if (ticker === 'PLTR') p = currentPrice * 0.45;
-  if (ticker === 'TSLA') p = currentPrice * 0.65;
-  if (ticker === 'VST') p = currentPrice * 0.55;
+  let dates = [];
+  let actualPrices = [];
+  let actualVolumes = [];
 
-  for (let i = historyDays; i >= 0; i--) {
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() - i * 1.4);
-    const dateStr = d.toISOString().split('T')[0];
-    dates.push(dateStr);
+  // 1. 만약 Yahoo Finance 등에서 연동한 실제 일봉 히스토리가 있으면 실시간 데이터 우선 채택!
+  if (stock.realHistory && stock.realHistory.length > 5) {
+    dates = stock.realHistory.map(h => h.date);
+    actualPrices = stock.realHistory.map(h => h.price);
+    actualVolumes = stock.realHistory.map(() => Math.round(35 + Math.random() * 30));
+  } else {
+    // 2. 검증된 시뮬레이션 일봉 생성
+    const baseDate = new Date("2026-11-14");
+    const historyDays = 90;
+    let p = currentPrice * 0.82;
+    if (ticker === 'AAPL') p = currentPrice * 0.95;
+    if (ticker === 'PLTR') p = currentPrice * 0.65;
+    if (ticker === 'TSLA') p = currentPrice * 0.75;
+    if (ticker === 'VST') p = currentPrice * 0.70;
 
-    if (i === 0) {
-      actualPrices.push(currentPrice);
-      actualVolumes.push(Math.round(45 + Math.random() * 20));
-    } else {
-      const drift = (currentPrice - p) / i;
-      const noise = (Math.random() - 0.48) * (currentPrice * 0.035);
-      p = Math.max(p + drift + noise, currentPrice * 0.3);
-      actualPrices.push(parseFloat(p.toFixed(2)));
-      actualVolumes.push(Math.round(30 + Math.random() * 35));
+    for (let i = historyDays; i >= 0; i--) {
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() - i * 1.4);
+      const dateStr = d.toISOString().split('T')[0];
+      dates.push(dateStr);
+
+      if (i === 0) {
+        actualPrices.push(currentPrice);
+        actualVolumes.push(Math.round(45 + Math.random() * 20));
+      } else {
+        const drift = (currentPrice - p) / i;
+        const noise = (Math.random() - 0.48) * (currentPrice * 0.035);
+        p = Math.max(p + drift + noise, currentPrice * 0.3);
+        actualPrices.push(parseFloat(p.toFixed(2)));
+        actualVolumes.push(Math.round(30 + Math.random() * 35));
+      }
     }
   }
 
+  const cutoffIndex = dates.length - 1;
+
   // 미래 예상치 (향후 60구간 = 약 6개월~1년 예상 궤적)
-  const predictedBase = new Array(dates.length - 1).fill(null);
-  const predictedBull = new Array(dates.length - 1).fill(null);
-  const predictedBear = new Array(dates.length - 1).fill(null);
+  const predictedBase = new Array(cutoffIndex).fill(null);
+  const predictedBull = new Array(cutoffIndex).fill(null);
+  const predictedBear = new Array(cutoffIndex).fill(null);
 
   // 오늘 시점 값 추가 (차트 연속성)
   predictedBase.push(currentPrice);
   predictedBull.push(currentPrice);
   predictedBear.push(currentPrice);
 
-  const targetBase = stock.targetPriceBase;
-  const targetBull = stock.targetPriceBull;
-  const targetBear = stock.targetPriceBear;
+  const targetBase = stock.targetPriceBase || (currentPrice * 1.18);
+  const targetBull = stock.targetPriceBull || (currentPrice * 1.38);
+  const targetBear = stock.targetPriceBear || (currentPrice * 0.82);
 
   const futureSteps = 60;
+  const lastDate = new Date(dates[cutoffIndex]);
+
   for (let j = 1; j <= futureSteps; j++) {
-    const d = new Date(baseDate);
+    const d = new Date(lastDate);
     d.setDate(d.getDate() + j * 3);
     const dateStr = d.toISOString().split('T')[0];
     dates.push(dateStr);

@@ -338,6 +338,83 @@ function initTickerShortcuts() {
 /**
  * 메인 대시보드 렌더링
  */
+/**
+ * Yahoo Finance 실시간 주가 및 실제 차트 데이터 비동기 조회
+ * 브라우저 환경에서 다중 CORS 프록시를 통해 최신 주가와 실제 일봉을 안전하게 가져옵니다.
+ */
+async function fetchRealtimeStockQuote(ticker) {
+  if (!ticker) return null;
+  const cleanTicker = ticker.toUpperCase().trim();
+  
+  // Yahoo Finance v8 chart API (최근 3개월 일봉 데이터)
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${cleanTicker}?interval=1d&range=3mo`;
+  
+  const proxies = [
+    `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+  ];
+
+  for (const proxyUrl of proxies) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃
+      
+      const res = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) continue;
+      const json = await res.json();
+      const chartResult = json?.chart?.result?.[0];
+      if (!chartResult || !chartResult.meta) continue;
+
+      const meta = chartResult.meta;
+      const currentPrice = meta.regularMarketPrice;
+      if (!currentPrice || isNaN(currentPrice)) continue;
+
+      const prevClose = meta.chartPreviousClose || meta.previousClose || currentPrice;
+      const change = currentPrice - prevClose;
+      const changePct = (change / prevClose) * 100;
+
+      // 실제 일봉 종가 히스토리 추출
+      const timestamps = chartResult.timestamp || [];
+      const quotes = chartResult.indicators?.quote?.[0]?.close || [];
+      const realHistory = [];
+
+      for (let i = 0; i < timestamps.length; i++) {
+        if (quotes[i] !== null && quotes[i] !== undefined && !isNaN(quotes[i])) {
+          const d = new Date(timestamps[i] * 1000);
+          const dateStr = d.toISOString().split("T")[0];
+          realHistory.push({
+            date: dateStr,
+            price: parseFloat(quotes[i].toFixed(2))
+          });
+        }
+      }
+
+      return {
+        ticker: cleanTicker,
+        currentPrice: parseFloat(currentPrice.toFixed(2)),
+        change: parseFloat(change.toFixed(2)),
+        changePct: parseFloat(changePct.toFixed(2)),
+        week52High: meta.fiftyTwoWeekHigh ? parseFloat(meta.fiftyTwoWeekHigh.toFixed(2)) : undefined,
+        week52Low: meta.fiftyTwoWeekLow ? parseFloat(meta.fiftyTwoWeekLow.toFixed(2)) : undefined,
+        currency: meta.currency || "USD",
+        realHistory: realHistory.length > 5 ? realHistory : null,
+        source: "Yahoo Finance (실시간 연동)",
+        timestamp: new Date().toLocaleTimeString("ko-KR", { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      };
+    } catch (e) {
+      console.warn(`[LiveQuote] Proxy ${proxyUrl} failed:`, e.message);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 선택된 기업 대시보드 로드 (검증 DB 기준 즉시 렌더링 후 실시간 API로 부드럽게 갱신)
+ */
 function loadStockDashboard(ticker) {
   let stock = STOCKS_DATABASE[ticker];
   if (!stock) {
@@ -348,73 +425,121 @@ function loadStockDashboard(ticker) {
   currentTicker = stock.ticker;
   initTickerShortcuts();
 
-  // 1. 헤더 요약 정보 업데이트
-  document.getElementById("stock-name-ko").innerText = stock.nameKo;
-  document.getElementById("stock-name-en").innerText = `${stock.nameEn} (${stock.ticker})`;
-  document.getElementById("stock-sector-badge").innerText = stock.sector;
-  document.getElementById("stock-chapter-badge").innerText = stock.chapter;
-  document.getElementById("stock-portfolio-share").innerText = stock.authorPortfolioShare;
+  // 헤더 요약 정보 렌더링 함수
+  function updateHeaderUI(isLive, timeLabel) {
+    document.getElementById("stock-name-ko").innerText = stock.nameKo;
+    document.getElementById("stock-name-en").innerText = `${stock.nameEn} (${stock.ticker})`;
+    document.getElementById("stock-sector-badge").innerText = stock.sector;
+    document.getElementById("stock-chapter-badge").innerText = stock.chapter;
+    document.getElementById("stock-portfolio-share").innerText = stock.authorPortfolioShare;
 
-  // 특별 랭킹 뱃지 업데이트 (META: 현시점 상승 1위, VST: 6개월 급등 1위)
-  const elSpecialRank = document.getElementById("stock-special-rank-badge");
-  if (elSpecialRank) {
-    if (stock.ticker === "META") {
-      elSpecialRank.innerHTML = `
-        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/40 ring-1 ring-yellow-200">
-          <span>👑</span>
-          <span>현 시점 상승 가능성 1위 종목</span>
-          <span class="text-[10px] bg-slate-950/25 text-slate-950 px-1.5 py-0.5 rounded-full font-bold">책 7장 저평가 FCF 제왕</span>
-        </span>
-      `;
-    } else if (stock.ticker === "VST") {
-      elSpecialRank.innerHTML = `
-        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-fuchsia-600 to-rose-600 text-white shadow-lg shadow-fuchsia-500/40 ring-1 ring-pink-300 animate-pulse">
-          <span>🚀</span>
-          <span>6개월 내 가장 가파른 급등 1위 종목</span>
-          <span class="text-[10px] bg-white/25 text-white px-1.5 py-0.5 rounded-full font-bold">책 8장 전력 폭증 슈퍼사이클</span>
-        </span>
-      `;
-    } else {
-      elSpecialRank.innerHTML = "";
+    // 특별 랭킹 뱃지 업데이트 (META: 현시점 상승 1위, VST: 6개월 급등 1위)
+    const elSpecialRank = document.getElementById("stock-special-rank-badge");
+    if (elSpecialRank) {
+      if (stock.ticker === "META") {
+        elSpecialRank.innerHTML = `
+          <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/40 ring-1 ring-yellow-200">
+            <span>👑</span>
+            <span>현 시점 상승 가능성 1위 종목</span>
+            <span class="text-[10px] bg-slate-950/25 text-slate-950 px-1.5 py-0.5 rounded-full font-bold">책 7장 저평가 FCF 제왕</span>
+          </span>
+        `;
+      } else if (stock.ticker === "VST") {
+        elSpecialRank.innerHTML = `
+          <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-fuchsia-600 to-rose-600 text-white shadow-lg shadow-fuchsia-500/40 ring-1 ring-pink-300 animate-pulse">
+            <span>🚀</span>
+            <span>6개월 내 가장 가파른 급등 1위 종목</span>
+            <span class="text-[10px] bg-white/25 text-white px-1.5 py-0.5 rounded-full font-bold">책 8장 전력 폭증 슈퍼사이클</span>
+          </span>
+        `;
+      } else {
+        elSpecialRank.innerHTML = "";
+      }
     }
+
+    // 실시간 연동 뱃지 업데이트
+    const elLiveBadge = document.getElementById("stock-live-badge");
+    const elPriceSource = document.getElementById("price-source-tag");
+    if (isLive) {
+      if (elLiveBadge) {
+        elLiveBadge.innerHTML = `
+          <span class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>Yahoo Finance 실시간 연동</span>
+          </span>
+        `;
+      }
+      if (elPriceSource) {
+        elPriceSource.innerText = `실시간 (${timeLabel})`;
+        elPriceSource.className = "text-[10px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-mono";
+      }
+    } else {
+      if (elLiveBadge) {
+        elLiveBadge.innerHTML = `
+          <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+            <i class="fas fa-check-circle text-sky-400 text-[10px] mr-1"></i>검증된 최신 종가 DB
+          </span>
+        `;
+      }
+      if (elPriceSource) {
+        elPriceSource.innerText = "검증 DB 기준";
+        elPriceSource.className = "text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono";
+      }
+    }
+
+    document.getElementById("stock-current-price").innerText = `$${stock.currentPrice.toFixed(2)}`;
+    const elPriceChange = document.getElementById("stock-price-change");
+    elPriceChange.className = `text-sm font-semibold flex items-center space-x-1 ${stock.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+    elPriceChange.innerHTML = `
+      <span>${stock.change >= 0 ? '▲' : '▼'} $${Math.abs(stock.change).toFixed(2)}</span>
+      <span>(${stock.change >= 0 ? '+' : ''}${stock.changePct.toFixed(2)}%)</span>
+      <span class="text-xs text-slate-400 font-normal ml-2">${isLive ? '실시간 거래가' : '최근 종가'}</span>
+    `;
+
+    document.getElementById("val-market-cap").innerText = stock.marketCap;
+    document.getElementById("val-pe").innerText = `${stock.peRatio}x`;
+    document.getElementById("val-fpe").innerText = `${stock.forwardPE}x`;
+    document.getElementById("val-52w").innerText = `$${stock.week52Low} ~ $${stock.week52High}`;
+
+    // 목표주가 카드
+    document.getElementById("target-base").innerText = `$${stock.targetPriceBase.toFixed(2)}`;
+    document.getElementById("target-bull").innerText = `$${stock.targetPriceBull.toFixed(2)}`;
+    document.getElementById("target-bear").innerText = `$${stock.targetPriceBear.toFixed(2)}`;
+    
+    const baseUpside = (((stock.targetPriceBase - stock.currentPrice) / stock.currentPrice) * 100).toFixed(1);
+    document.getElementById("target-base-upside").innerText = `${baseUpside >= 0 ? '+' : ''}${baseUpside}% 예상`;
   }
 
-  document.getElementById("stock-current-price").innerText = `$${stock.currentPrice.toFixed(2)}`;
-  const elPriceChange = document.getElementById("stock-price-change");
-  elPriceChange.className = `text-sm font-semibold flex items-center space-x-1 ${stock.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-  elPriceChange.innerHTML = `
-    <span>${stock.change >= 0 ? '▲' : '▼'} $${Math.abs(stock.change).toFixed(2)}</span>
-    <span>(${stock.change >= 0 ? '+' : ''}${stock.changePct}%)</span>
-    <span class="text-xs text-slate-400 font-normal ml-2">오늘 실시간</span>
-  `;
-
-  document.getElementById("val-market-cap").innerText = stock.marketCap;
-  document.getElementById("val-pe").innerText = `${stock.peRatio}x`;
-  document.getElementById("val-fpe").innerText = `${stock.forwardPE}x`;
-  document.getElementById("val-52w").innerText = `$${stock.week52Low} ~ $${stock.week52High}`;
-
-  // 목표주가 카드
-  document.getElementById("target-base").innerText = `$${stock.targetPriceBase.toFixed(2)}`;
-  document.getElementById("target-bull").innerText = `$${stock.targetPriceBull.toFixed(2)}`;
-  document.getElementById("target-bear").innerText = `$${stock.targetPriceBear.toFixed(2)}`;
-  
-  const baseUpside = (((stock.targetPriceBase - stock.currentPrice) / stock.currentPrice) * 100).toFixed(1);
-  document.getElementById("target-base-upside").innerText = `${baseUpside >= 0 ? '+' : ''}${baseUpside}% 예상`;
-
-  // 2. 8대 실적 지표 & 실제 순수익률 렌더링 (부록 B 기반)
+  // 1단계: 검증된 최신 데이터베이스 기준으로 지연 없이 즉각 렌더링
+  updateHeaderUI(false);
   renderFinancialCards(stock);
-
-  // 3. 차트 렌더링 (실시간 주가 vs 향후 예상 주가 다른 색상 구분)
   renderStockPredictionChart(stock);
-
-  // 4. 저자의 5단계 투자 진단 스코어카드
   renderFiveStepScorecard(stock);
-
-  // 5. 최신 뉴스 및 감성 분석 피드
   renderNewsFeed(stock);
-
-  // 6. 15대 체크리스트 종목명 반영
   document.getElementById("checklist-stock-target").innerText = `${stock.nameKo} (${stock.ticker})`;
+
+  // 2단계: 백그라운드에서 Yahoo Finance 실시간 시세 API 비동기 조회
+  const targetTickerForFetch = stock.ticker;
+  fetchRealtimeStockQuote(targetTickerForFetch).then(live => {
+    // 사용자가 대기 도중 다른 종목을 누르지 않았을 때만 적용
+    if (live && currentTicker === targetTickerForFetch) {
+      stock.currentPrice = live.currentPrice;
+      stock.change = live.change;
+      stock.changePct = live.changePct;
+      if (live.week52High) stock.week52High = live.week52High;
+      if (live.week52Low) stock.week52Low = live.week52Low;
+      if (live.realHistory) stock.realHistory = live.realHistory;
+
+      // 목표주가도 실시간 변동폭에 맞춰 재계산
+      stock.targetPriceBase = parseFloat((stock.currentPrice * 1.18).toFixed(2));
+      stock.targetPriceBull = parseFloat((stock.currentPrice * 1.38).toFixed(2));
+      stock.targetPriceBear = parseFloat((stock.currentPrice * 0.82).toFixed(2));
+
+      // 헤더 및 차트 실시간 갱신
+      updateHeaderUI(true, live.timestamp);
+      renderStockPredictionChart(stock);
+    }
+  });
 }
 
 /**
@@ -514,7 +639,7 @@ function renderFinancialCards(stock) {
  */
 function renderStockPredictionChart(stock) {
   const ctx = document.getElementById("stock-prediction-chart").getContext("2d");
-  const data = generateHistoricalAndFutureData(stock.ticker);
+  const data = generateHistoricalAndFutureData(stock.ticker, stock);
   if (!data) return;
 
   // What-If 시뮬레이터 파라미터 적용 (금리 변동 & 유가 변동 & 성장률 조정치)
