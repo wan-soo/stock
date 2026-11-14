@@ -1,0 +1,42 @@
+# OS generated files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and sensitive files
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary / build
+node_modules/
+dist/
+build/
+
+# Private Documents / E-books (저작권 및 개인 문서 보호)
+*.pdf
+*.epub
+*.mobi

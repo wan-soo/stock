@@ -1,6 +1,6 @@
 /**
  * AI 시대, 미국 주식의 판이 바뀐다 (저자: 김완수)
- * 통합 대시보드 및 주가 예측 웹 애플리케이션
+ * 통합 대시보드 및 주가 예측 웹 애플리케이션 (범용 검색 지원 버전)
  */
 
 let currentTicker = "NVDA";
@@ -10,7 +10,7 @@ let stockChartInstance = null;
 let simParams = {
   us10y: MARKET_MACRO_DATA.us10yYield.current,
   oil: MARKET_MACRO_DATA.wtiOil.current,
-  growthBoost: 0 // -20% ~ +20%
+  growthBoost: 0 // -20% ~ +30%
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -100,7 +100,7 @@ function initMacroHeader() {
 }
 
 /**
- * 기업명 검색 및 자동완성
+ * 기업명 검색 및 자동완성 (어떤 기업이든 즉각 분석 지원)
  */
 function initSearch() {
   const input = document.getElementById("stock-search-input");
@@ -110,56 +110,90 @@ function initSearch() {
   const filterStocks = (query) => {
     if (!query || query.trim() === "") return [];
     const q = query.trim().toLowerCase();
-    return Object.values(STOCKS_DATABASE).filter(s => 
+    
+    // 1. 기존 DB 매칭
+    const matches = Object.values(STOCKS_DATABASE).filter(s => 
       s.ticker.toLowerCase().includes(q) ||
       s.nameKo.toLowerCase().includes(q) ||
       s.nameEn.toLowerCase().includes(q)
     );
+
+    // 2. 한글 매핑 사전에 있는 경우 추가 매칭
+    for (const [kName, tVal] of Object.entries(KOREAN_TICKER_MAP)) {
+      if (kName.toLowerCase().includes(q) || q.includes(kName.toLowerCase())) {
+        if (!matches.some(m => m.ticker === tVal)) {
+          const sObj = STOCKS_DATABASE[tVal] || lookupOrGenerateStock(kName);
+          if (sObj && !matches.some(m => m.ticker === sObj.ticker)) {
+            matches.push(sObj);
+          }
+        }
+      }
+    }
+
+    return matches;
   };
 
-  const renderSuggestions = (matches) => {
-    if (matches.length === 0) {
+  const renderSuggestions = (query, matches) => {
+    if (!query || query.trim() === "") {
       suggestionsBox.classList.add("hidden");
       return;
     }
-    suggestionsBox.innerHTML = matches.map(s => `
-      <div class="px-4 py-3 hover:bg-slate-700/60 cursor-pointer flex items-center justify-between border-b border-slate-700/40 last:border-none transition"
-           onclick="selectStock('${s.ticker}')">
-        <div class="flex items-center space-x-3">
-          <span class="font-bold text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800 text-xs">${s.ticker}</span>
-          <span class="font-semibold text-slate-100 text-sm">${s.nameKo}</span>
-          <span class="text-xs text-slate-400">${s.nameEn}</span>
-        </div>
-        <div class="text-right">
-          <span class="text-sm font-bold text-slate-200">$${s.currentPrice.toFixed(2)}</span>
-          <span class="text-xs block ${s.change >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium">
-            ${s.change >= 0 ? '+' : ''}${s.changePct}%
+
+    const trimmedQ = query.trim();
+    let html = `
+      <!-- 즉석 동적 분석 실행 옵션 -->
+      <div class="px-4 py-3 bg-gradient-to-r from-sky-950/80 to-slate-900 hover:from-sky-900/90 hover:to-slate-800 cursor-pointer flex items-center justify-between border-b border-sky-800/40 transition"
+           onclick="handleSearchSubmit('${trimmedQ.replace(/'/g, "\\'")}')">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-xs">
+            <i class="fas fa-wand-magic-sparkles"></i>
           </span>
+          <div>
+            <span class="text-xs text-sky-300 font-bold block">'${trimmedQ}' 실시간 펀더멘털 & 주가 예측 분석</span>
+            <span class="text-[10px] text-slate-400">책의 5단계 분석 및 금리·유가·순수익률 실시간 대조</span>
+          </div>
         </div>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-sky-600 text-white">즉시 분석</span>
       </div>
-    `).join("");
+    `;
+
+    if (matches.length > 0) {
+      html += matches.map(s => `
+        <div class="px-4 py-3 hover:bg-slate-700/60 cursor-pointer flex items-center justify-between border-b border-slate-700/40 last:border-none transition"
+             onclick="selectStock('${s.ticker}')">
+          <div class="flex items-center space-x-3">
+            <span class="font-bold text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800 text-xs">${s.ticker}</span>
+            <span class="font-semibold text-slate-100 text-sm">${s.nameKo}</span>
+            <span class="text-xs text-slate-400">${s.nameEn}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-bold text-slate-200">$${s.currentPrice.toFixed(2)}</span>
+            <span class="text-xs block ${s.change >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-medium">
+              ${s.change >= 0 ? '+' : ''}${s.changePct}%
+            </span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    suggestionsBox.innerHTML = html;
     suggestionsBox.classList.remove("hidden");
   };
 
   input.addEventListener("input", (e) => {
-    const matches = filterStocks(e.target.value);
-    renderSuggestions(matches);
+    const q = e.target.value;
+    const matches = filterStocks(q);
+    renderSuggestions(q, matches);
   });
 
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-      const matches = filterStocks(input.value);
-      if (matches.length > 0) {
-        selectStock(matches[0].ticker);
-      }
+      handleSearchSubmit(input.value);
     }
   });
 
   searchBtn.addEventListener("click", () => {
-    const matches = filterStocks(input.value);
-    if (matches.length > 0) {
-      selectStock(matches[0].ticker);
-    }
+    handleSearchSubmit(input.value);
   });
 
   document.addEventListener("click", (e) => {
@@ -169,23 +203,84 @@ function initSearch() {
   });
 }
 
-function selectStock(ticker) {
-  currentTicker = ticker;
+/**
+ * 사용자가 입력한 검색어에 대해 즉각 분석 제출 처리
+ */
+function handleSearchSubmit(query) {
+  if (!query || query.trim() === "") return;
+  const rawQ = query.trim();
+
+  // 1. 범용 종목 분석 엔진 가동 (기존 DB 종목이든 새로 입력된 종목이든 상관없이 분석 산출)
+  const stock = lookupOrGenerateStock(rawQ);
+  if (!stock) return;
+
+  currentTicker = stock.ticker;
   document.getElementById("stock-search-input").value = "";
   document.getElementById("search-suggestions").classList.add("hidden");
-  loadStockDashboard(ticker);
+  
+  // 2. 대시보드 렌더링
+  loadStockDashboard(stock.ticker);
+
+  // 3. 사용자 알림 토스트 표시
+  showAnalysisNotice(stock.nameKo, stock.ticker, stock.sector);
+}
+
+function selectStock(ticker) {
+  const stock = STOCKS_DATABASE[ticker] || lookupOrGenerateStock(ticker);
+  if (stock) {
+    currentTicker = stock.ticker;
+    document.getElementById("stock-search-input").value = "";
+    document.getElementById("search-suggestions").classList.add("hidden");
+    loadStockDashboard(stock.ticker);
+  }
 }
 
 /**
- * 핫 티커 버튼 초기화
+ * 분석 완료 안내 알림 토스트
+ */
+function showAnalysisNotice(nameKo, ticker, sector) {
+  let toast = document.getElementById("search-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "search-toast";
+    toast.className = "fixed bottom-5 right-5 z-50 bg-slate-900 border border-sky-500/50 shadow-2xl rounded-2xl p-4 max-w-sm transition-all duration-300 transform translate-y-0";
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML = `
+    <div class="flex items-start space-x-3">
+      <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center flex-shrink-0 text-sm">
+        <i class="fas fa-chart-pie"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1.5">
+          <span class="font-bold text-white text-sm">${nameKo} (${ticker})</span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded font-semibold">분석 완료</span>
+        </div>
+        <p class="text-xs text-slate-300 mt-1 leading-tight">
+          전자책 프레임워크와 실시간 거시경제(금리 ${MARKET_MACRO_DATA.us10yYield.current}%, 유가 $${MARKET_MACRO_DATA.wtiOil.current})를 대조한 주가 예측 차트가 생성되었습니다.
+        </p>
+      </div>
+    </div>
+  `;
+
+  toast.classList.remove("hidden", "opacity-0");
+  setTimeout(() => {
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 4500);
+}
+
+/**
+ * 핫 티커 버튼 초기화 (전자책 주요 다룸 종목들 및 섹터별 대표주)
  */
 function initTickerShortcuts() {
   const container = document.getElementById("hot-tickers-container");
   if (!container) return;
-  const popularTickers = ["NVDA", "TSLA", "PLTR", "META", "MSFT", "AMZN", "GOOGL", "AAPL", "SPCX"];
+  const popularTickers = ["NVDA", "TSLA", "PLTR", "META", "AVGO", "TSM", "VST", "MSFT", "AMZN", "GOOGL", "AAPL", "SPCX"];
   
   container.innerHTML = popularTickers.map(t => {
-    const s = STOCKS_DATABASE[t];
+    const s = STOCKS_DATABASE[t] || lookupOrGenerateStock(t);
     return `
       <button onclick="selectStock('${t}')" 
               class="ticker-pill px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all
@@ -201,10 +296,13 @@ function initTickerShortcuts() {
  * 메인 대시보드 렌더링
  */
 function loadStockDashboard(ticker) {
-  const stock = STOCKS_DATABASE[ticker];
+  let stock = STOCKS_DATABASE[ticker];
+  if (!stock) {
+    stock = lookupOrGenerateStock(ticker);
+  }
   if (!stock) return;
 
-  currentTicker = ticker;
+  currentTicker = stock.ticker;
   initTickerShortcuts();
 
   // 1. 헤더 요약 정보 업데이트
@@ -353,7 +451,6 @@ function renderStockPredictionChart(stock) {
   if (!data) return;
 
   // What-If 시뮬레이터 파라미터 적용 (금리 변동 & 유가 변동 & 성장률 조정치)
-  // 금리 4.42% 기준: 10년물 금리가 0.5%p 오를 때마다 미래 밸류에이션 -7% 압축
   const rateDelta = simParams.us10y - MARKET_MACRO_DATA.us10yYield.current;
   const rateDiscountFactor = 1 - (rateDelta * 0.14); // 금리 1%p 상승 시 미래가치 약 14% 압축
   const growthFactor = 1 + (simParams.growthBoost / 100);
@@ -474,7 +571,7 @@ function renderStockPredictionChart(stock) {
                 return [
                   "",
                   `• 적용 10년물 금리: ${simParams.us10y.toFixed(2)}% (할인율 압박)`,
-                  `• 실적 FCF 반영도: ${stock.financials.netMargin}`
+                  `• 실적 순수익률: ${stock.financials.netMargin}`
                 ];
               }
               return [];
@@ -631,7 +728,7 @@ function initWhatIfSimulator() {
     valGrowth.innerText = `${simParams.growthBoost >= 0 ? '+' : ''}${simParams.growthBoost}%`;
 
     // 현재 종목 차트 즉각 재렌더링
-    const stock = STOCKS_DATABASE[currentTicker];
+    const stock = STOCKS_DATABASE[currentTicker] || lookupOrGenerateStock(currentTicker);
     if (stock) {
       renderStockPredictionChart(stock);
     }
@@ -662,7 +759,7 @@ function initPortfolioCalculator() {
   if (!calcBtn || !inputFund) return;
 
   calcBtn.addEventListener("click", () => {
-    const totalAmount = parseFloat(inputFund.value) || 10000000; // 기본 천만원
+    const totalAmount = parseFloat(inputFund.value) || 10000000;
     const nvdaAmount = totalAmount * 0.3;
     const tslaAmount = totalAmount * 0.3;
     const cashAmount = totalAmount * 0.4;
