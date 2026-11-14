@@ -273,20 +273,63 @@ function showAnalysisNotice(nameKo, ticker, sector) {
 
 /**
  * 핫 티커 버튼 초기화 (전자책 주요 다룸 종목들 및 섹터별 대표주)
+ * - 현 시점 주가 상승 가능성 1위: META (골드 앰버 하이라이트)
+ * - 6개월 내 가장 가파른 급등 1위: VST (네온 푸시아/로즈 하이라이트)
  */
 function initTickerShortcuts() {
   const container = document.getElementById("hot-tickers-container");
   if (!container) return;
-  const popularTickers = ["NVDA", "TSLA", "PLTR", "META", "AVGO", "TSM", "VST", "MSFT", "AMZN", "GOOGL", "AAPL", "SPCX"];
+  const popularTickers = ["NVDA", "TSLA", "PLTR", "META", "VST", "AVGO", "TSM", "MSFT", "AMZN", "GOOGL", "AAPL", "SPCX"];
   
   container.innerHTML = popularTickers.map(t => {
     const s = STOCKS_DATABASE[t] || lookupOrGenerateStock(t);
+    const isSelected = (t === currentTicker);
+
+    // 1. 현 시점 상승 가능성 1위: META (책 7장 밸류에이션 최상위 + FCF 폭발)
+    if (t === "META") {
+      return `
+        <button onclick="selectStock('${t}')" 
+                class="ticker-pill relative group px-3.5 py-1.5 rounded-xl text-xs font-black transition-all duration-300 transform hover:scale-105
+                       ${isSelected 
+                         ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 ring-2 ring-yellow-200 shadow-xl shadow-amber-500/50' 
+                         : 'bg-gradient-to-r from-amber-500/25 to-yellow-600/30 text-amber-200 border-2 border-amber-400/80 hover:bg-amber-500/40 shadow-lg shadow-amber-500/20'}">
+          <span class="flex items-center space-x-1.5">
+            <span class="text-amber-300 animate-bounce text-[11px]">👑</span>
+            <span>${s.nameKo}</span>
+            <span class="text-[10px] opacity-80 font-mono">(${t})</span>
+            <span class="ml-1 text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded-full font-extrabold tracking-tight">현시점 상승 1위</span>
+          </span>
+        </button>
+      `;
+    }
+
+    // 2. 6개월 안에 가장 가파르게 상승할 기업: VST (책 8장 전력 폭증 슈퍼사이클 최대 잭팟)
+    if (t === "VST") {
+      return `
+        <button onclick="selectStock('${t}')" 
+                class="ticker-pill relative group px-3.5 py-1.5 rounded-xl text-xs font-black transition-all duration-300 transform hover:scale-105
+                       ${isSelected 
+                         ? 'bg-gradient-to-r from-fuchsia-600 to-rose-600 text-white ring-2 ring-pink-300 shadow-xl shadow-fuchsia-500/50' 
+                         : 'bg-gradient-to-r from-fuchsia-950/60 to-rose-950/60 text-fuchsia-200 border-2 border-fuchsia-500/80 hover:border-pink-400 shadow-lg shadow-fuchsia-500/20'}">
+          <span class="flex items-center space-x-1.5">
+            <span class="text-rose-400 animate-pulse text-[11px]">🚀</span>
+            <span>${s.nameKo}</span>
+            <span class="text-[10px] opacity-80 font-mono">(${t})</span>
+            <span class="ml-1 text-[10px] bg-gradient-to-r from-fuchsia-500 to-rose-500 text-white px-1.5 py-0.2 rounded-full font-extrabold tracking-tight animate-pulse">6개월 급등 1위</span>
+          </span>
+        </button>
+      `;
+    }
+
+    // 일반 종목
     return `
       <button onclick="selectStock('${t}')" 
               class="ticker-pill px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all
-                     ${t === currentTicker ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/50'}">
+                     ${isSelected 
+                       ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30 ring-2 ring-sky-300' 
+                       : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/50'}">
         <span>${s.nameKo}</span>
-        <span class="opacity-75 text-[11px]">(${t})</span>
+        <span class="opacity-75 text-[11px] font-mono">(${t})</span>
       </button>
     `;
   }).join("");
@@ -311,6 +354,30 @@ function loadStockDashboard(ticker) {
   document.getElementById("stock-sector-badge").innerText = stock.sector;
   document.getElementById("stock-chapter-badge").innerText = stock.chapter;
   document.getElementById("stock-portfolio-share").innerText = stock.authorPortfolioShare;
+
+  // 특별 랭킹 뱃지 업데이트 (META: 현시점 상승 1위, VST: 6개월 급등 1위)
+  const elSpecialRank = document.getElementById("stock-special-rank-badge");
+  if (elSpecialRank) {
+    if (stock.ticker === "META") {
+      elSpecialRank.innerHTML = `
+        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/40 ring-1 ring-yellow-200">
+          <span>👑</span>
+          <span>현 시점 상승 가능성 1위 종목</span>
+          <span class="text-[10px] bg-slate-950/25 text-slate-950 px-1.5 py-0.5 rounded-full font-bold">책 7장 저평가 FCF 제왕</span>
+        </span>
+      `;
+    } else if (stock.ticker === "VST") {
+      elSpecialRank.innerHTML = `
+        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-fuchsia-600 to-rose-600 text-white shadow-lg shadow-fuchsia-500/40 ring-1 ring-pink-300 animate-pulse">
+          <span>🚀</span>
+          <span>6개월 내 가장 가파른 급등 1위 종목</span>
+          <span class="text-[10px] bg-white/25 text-white px-1.5 py-0.5 rounded-full font-bold">책 8장 전력 폭증 슈퍼사이클</span>
+        </span>
+      `;
+    } else {
+      elSpecialRank.innerHTML = "";
+    }
+  }
 
   document.getElementById("stock-current-price").innerText = `$${stock.currentPrice.toFixed(2)}`;
   const elPriceChange = document.getElementById("stock-price-change");
