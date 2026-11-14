@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 시대, 미국 주식 예측 & 실전 투자 분석기 | 김완수 가이드 기반</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              900: '#0c4a6e',
+              950: '#082f49'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Web Fonts & FontAwesome -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      font-family: 'Pretendard', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- 1. 최상단 실시간 매크로 지표 티커 테이프 바 (책 4부 및 10~12장 반영) -->
+  <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14">
+        
+        <!-- 서비스 로고 & 책 타이틀 -->
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+            <i class="fas fa-brain text-white text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-base tracking-tight text-white">AI 미국주식 예측 나침반</span>
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 border border-sky-500/40 px-1.5 py-0.5 rounded font-bold">전자책 실전 연동</span>
+            </div>
+            <div class="text-[11px] text-slate-400">『AI 시대, 미국 주식의 판이 바뀐다』 김완수 저자 프레임워크</div>
+          </div>
+        </div>
+
+        <!-- 실시간 매크로 지표들 (환율, 10년물 금리, 연준금리, WTI 유가, 공포&탐욕 지수) -->
+        <div class="hidden md:flex items-center space-x-5 text-xs">
+          <div id="macro-exchange" class="py-1"></div>
+          <div class="h-4 w-px bg-slate-800"></div>
+          <div id="macro-us10y" class="py-1" title="10장: 미 10년물 국채 금리 = 무위험 할인율 (성장주 PER 압축)"></div>
+          <div class="h-4 w-px bg-slate-800"></div>
+          <div id="macro-fed" class="py-1" title="11장: 연준 기준금리"></div>
+          <div class="h-4 w-px bg-slate-800"></div>
+          <div id="macro-oil" class="py-1" title="11장: 유가 및 인플레이션 압력"></div>
+          <div class="h-4 w-px bg-slate-800"></div>
+          <div id="macro-fear-greed" class="py-1" title="12장: CNN 공포와 탐욕 지수 (20 이하 분할 매수)"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 모바일 매크로 스크롤러 -->
+    <div class="md:hidden flex items-center space-x-4 px-4 py-2 overflow-x-auto text-xs border-t border-slate-900 bg-slate-950">
+      <div id="macro-exchange-mob" class="flex-shrink-0"></div>
+      <div id="macro-us10y-mob" class="flex-shrink-0"></div>
+      <div id="macro-fear-mob" class="flex-shrink-0"></div>
+    </div>
+  </header>
+
+  <!-- 2. 메인 콘텐츠 컨테이너 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 책 요약 배너 및 검색 섹션 -->
+    <section class="bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/40 border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1.5">
+          <div class="inline-flex items-center space-x-2 text-xs font-semibold text-sky-400 bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-800/50">
+            <i class="fas fa-book-open"></i>
+            <span>김완수 저자의 5단계 분석 루틴 & 30:30:40 투자 원칙</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            미국 빅테크 실시간 펀더멘털 분석 및 주가 예측 시스템
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400 max-w-2xl">
+            기업명을 입력하면 현재 실시간 주가와 앞으로의 예상 주가 시나리오를 서로 다른 색상으로 대조 분석합니다.
+            환율, 국채 금리, 8대 실적 지표, 잉여현금흐름(FCF)을 실시간 검증하세요.
+          </p>
+        </div>
+
+        <!-- 기업 검색 입력란 -->
+        <div class="w-full lg:w-96 relative">
+          <label for="stock-search-input" class="sr-only">기업명 또는 티커 검색</label>
+          <div class="relative">
+            <input type="text" id="stock-search-input" 
+                   placeholder="기업명 입력 (예: 엔비디아, 테슬라, 팔란티어, NVDA...)" 
+                   autocomplete="off"
+                   class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-11 pr-24 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition shadow-inner">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-search"></i>
+            </div>
+            <button id="search-btn" class="absolute inset-y-1.5 right-1.5 px-4 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1 shadow">
+              <span>분석</span>
+              <i class="fas fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+
+          <!-- 자동완성 제안 목록 드롭다운 -->
+          <div id="search-suggestions" class="absolute left-0 right-0 top-full mt-1.5 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl z-40 max-h-80 overflow-y-auto hidden"></div>
+        </div>
+      </div>
+
+      <!-- 추천 핫 티커 (전자책 주요 다룸 종목) -->
+      <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-wrap items-center gap-2">
+        <span class="text-xs text-slate-400 font-medium mr-1"><i class="fas fa-fire text-amber-400 mr-1"></i>책 핵심 분석 기업:</span>
+        <div id="hot-tickers-container" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </section>
+
+    <!-- 3. 선택된 기업 핵심 헤더 & 주가 요약 바 -->
+    <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 backdrop-blur">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div>
+          <div class="flex items-center space-x-3">
+            <h2 id="stock-name-ko" class="text-2xl sm:text-3xl font-extrabold text-white">엔비디아</h2>
+            <span id="stock-name-en" class="text-sm font-semibold text-slate-400">NVIDIA Corp. (NVDA)</span>
+            <span id="stock-sector-badge" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-sky-300 border border-slate-700"></span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 mt-2">
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-medium">
+              <i class="fas fa-bookmark mr-1"></i><span id="stock-chapter-badge">2장</span>
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-medium">
+              <i class="fas fa-pie-chart mr-1"></i>저자 포트폴리오 비중: <span id="stock-portfolio-share">30%</span>
+            </span>
+            <span id="chart-cutoff-tag"></span>
+          </div>
+        </div>
+
+        <!-- 가격 & 밸류에이션 요약 -->
+        <div class="flex flex-wrap items-end gap-6 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <div class="text-[11px] text-slate-400">현재 실시간 주가</div>
+            <div class="text-2xl sm:text-3xl font-black text-white tracking-tight" id="stock-current-price">$148.50</div>
+            <div id="stock-price-change" class="text-xs font-semibold"></div>
+          </div>
+
+          <div class="h-10 w-px bg-slate-800 hidden sm:block"></div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <span class="text-slate-500 block">시가총액</span>
+              <span id="val-market-cap" class="font-bold text-slate-200">3.65T</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">PER (배수)</span>
+              <span id="val-pe" class="font-bold text-amber-300">45.8x</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">Forward PER</span>
+              <span id="val-fpe" class="font-bold text-slate-200">33.2x</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block">52주 변동폭</span>
+              <span id="val-52w" class="font-bold text-slate-300">$75~$153</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. 실시간 주가 차트 + 미래 예상 주가 차트 (다른 색상 구분) & 목표가 카드 -->
+    <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- 메인 캔버스 차트 (3열 차지) -->
+      <div class="lg:col-span-3 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+        <div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-2">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i class="fas fa-chart-line text-sky-400"></i>
+                <span>실시간 주가 추이 vs 미래 예상 주가 곡선</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                청록색 실선: 현재까지의 실제 주가 | 황금/점선: AI 실적·금리 할인율 기반 예상 궤적
+              </p>
+            </div>
+
+            <!-- 차트 범례 설명 -->
+            <div class="flex flex-wrap items-center gap-3 text-[11px]">
+              <span class="flex items-center space-x-1">
+                <span class="w-3 h-1 bg-sky-500 rounded"></span>
+                <span class="text-slate-300">실시간 주가</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span class="w-3 h-0.5 border-t-2 border-dashed border-amber-400"></span>
+                <span class="text-amber-300">Base 예상</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span class="w-3 h-0.5 border-t-2 border-dashed border-emerald-400"></span>
+                <span class="text-emerald-300">Bull 낙관</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span class="w-3 h-0.5 border-t-2 border-dashed border-rose-400"></span>
+                <span class="text-rose-300">Bear 보수</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- 차트 영역 -->
+          <div class="relative w-full h-[360px] sm:h-[420px] mt-4">
+            <canvas id="stock-prediction-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-500">
+          <div><i class="fas fa-info-circle mr-1"></i>예측 모델은 전자책 10장(10년물 금리 할인율), 13장(실적 컨센서스/가이던스), FCF 순수익률을 종합 반영함.</div>
+          <div class="font-mono text-[11px]">단위: USD ($)</div>
+        </div>
+      </div>
+
+      <!-- 우측: 미래 예상 목표주가 시나리오 & 밸류에이션 요약 카드 (1열 차지) -->
+      <div class="lg:col-span-1 space-y-4">
+        
+        <!-- 시나리오별 예상가 카드 -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <div class="border-b border-slate-800 pb-2">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fas fa-crosshairs text-amber-400"></i>
+              <span>1년 후 예상 목표 주가</span>
+            </h4>
+            <span class="text-[11px] text-slate-400">전자책 가치평가 모델 산출</span>
+          </div>
+
+          <!-- Base 기본 전망 -->
+          <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-3.5">
+            <div class="flex items-center justify-between text-xs text-amber-300 font-semibold mb-1">
+              <span>기본 전망 (Base Case)</span>
+              <span id="target-base-upside" class="text-emerald-400 font-bold">+24.5%</span>
+            </div>
+            <div class="text-2xl font-black text-amber-300" id="target-base">$185.00</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-tight">현재 실적 성장세와 금리 할인율이 균형을 이루는 적정 가치</p>
+          </div>
+
+          <!-- Bull 낙관 시나리오 -->
+          <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-3">
+            <div class="flex items-center justify-between text-xs text-emerald-300 font-semibold mb-0.5">
+              <span>낙관 시나리오 (Bull)</span>
+              <span class="text-emerald-400 font-bold">폭발적 성장</span>
+            </div>
+            <div class="text-xl font-black text-emerald-300" id="target-bull">$220.00</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-tight">AI 인프라 CapEx 폭증 & 차세대 신기술 완판 시나리오</p>
+          </div>
+
+          <!-- Bear 보수 시나리오 -->
+          <div class="bg-rose-950/20 border border-rose-500/30 rounded-xl p-3">
+            <div class="flex items-center justify-between text-xs text-rose-300 font-semibold mb-0.5">
+              <span>보수 시나리오 (Bear)</span>
+              <span class="text-rose-400 font-bold">멀티플 압축</span>
+            </div>
+            <div class="text-xl font-black text-rose-300" id="target-bear">$120.00</div>
+            <p class="text-[11px] text-slate-400 mt-1 leading-tight">10년물 금리 급등 & 빅테크 CapEx 지출 둔화 시 하방 지지선</p>
+          </div>
+        </div>
+
+        <!-- 저자의 30:30:40 원칙 퀵 박스 -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs space-y-2">
+          <div class="font-bold text-slate-200 flex items-center space-x-1.5">
+            <i class="fas fa-shield-halved text-sky-400"></i>
+            <span>김완수 저자의 30:30:40 원칙</span>
+          </div>
+          <p class="text-slate-400 leading-relaxed text-[11px]">
+            "확신이 서는 최고의 기업(NVDA 30%, TSLA 30%)에는 꾸준히 적립하고, 나머지 40% 현금은 공포지수 20 이하 시 분할 매수할 최후의 보루로 남긴다." (책 11장)
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 5. 부록 B 기반: 기업 8대 실적 지표 & 실제 순수익률 그리드 -->
+    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 class="text-base sm:text-lg font-bold text-white flex items-center space-x-2">
+              <i class="fas fa-table-list text-sky-400"></i>
+              <span>어닝 시즌 필수 점검! 기업 8대 실적 지표 & 순수익률</span>
+            </h3>
+            <span class="text-[11px] bg-sky-950 text-sky-300 border border-sky-800 px-2 py-0.5 rounded font-semibold">부록 B</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            "헤드라인 매출 숫자 하나에 속지 마라. 통장에 꽂히는 진짜 현금(FCF)과 영업이익률을 확인하라" (책 13장, 14장)
+          </p>
+        </div>
+      </div>
+
+      <!-- 8개 카드 그리드 -->
+      <div id="financial-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </section>
+
+    <!-- 6. 김완수 저자의 5단계 투자 진단 스코어카드 & Bull/Bear 핵심 팩트 -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- 5단계 진단 스코어카드 (2열) -->
+      <div class="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fas fa-award text-amber-400"></i>
+              <span>김완수 저자의 5단계 투자 진단 스코어카드</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">본문 14장 '매수·보유·관망 5단계 철통 판단 시스템' 기반 자동 판정</p>
+          </div>
+          <div id="final-action-badge"></div>
+        </div>
+
+        <!-- 4개 스코어 프로그레스 바 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- 1단계: 독점적 기술 해자 -->
+          <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-semibold">1단계: 독점적 기술 해자 (Moat)</span>
+              <span id="score-moat" class="font-bold text-sky-400">98/100</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="bar-moat" class="h-full bg-sky-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+            <p id="book-moat-text" class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed"></p>
+          </div>
+
+          <!-- 2단계: 8대 재무 실적 & FCF 체력 -->
+          <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-semibold">2단계: 실적 & 순수 FCF 체력</span>
+              <span id="score-financial" class="font-bold text-emerald-400">96/100</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="bar-financial" class="h-full bg-emerald-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">회계상 이익과 실제 통장에 꽂히는 잉여현금흐름(FCF)의 퀄리티 우수.</p>
+          </div>
+
+          <!-- 3단계: 매크로(금리/유가) 내구성 -->
+          <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-semibold">3단계: 매크로(금리/유가) 내성</span>
+              <span id="score-macro" class="font-bold text-amber-300">82/100</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="bar-macro" class="h-full bg-amber-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">10년물 국채 금리 4.4% 수준에서도 높은 영업이익률로 할인율 압박 방어.</p>
+          </div>
+
+          <!-- 4단계: 밸류에이션(PER) 적정성 -->
+          <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-semibold">4단계: 밸류에이션 & 거품 검증</span>
+              <span id="score-valuation" class="font-bold text-indigo-300">78/100</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="bar-valuation" class="h-full bg-indigo-500 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">고성장성 감안 시 적정 수준이나 단기 과열 구간 여부 분할 매수로 대응.</p>
+          </div>
+
+        </div>
+
+        <!-- 저자 실전 코멘트 -->
+        <div class="p-4 bg-sky-950/30 border border-sky-800/40 rounded-xl space-y-1.5">
+          <div class="flex items-center space-x-2 text-xs font-bold text-sky-300">
+            <i class="fas fa-comment-dots"></i>
+            <span>김완수 저자의 실전 종목 심층 코멘트</span>
+          </div>
+          <p id="author-deep-comment" class="text-xs text-slate-300 leading-relaxed"></p>
+        </div>
+
+      </div>
+
+      <!-- 우측: Bull vs Bear 핵심 관전 포인트 (1열) -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="border-b border-slate-800 pb-2">
+          <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fas fa-scale-balanced text-indigo-400"></i>
+            <span>핵심 관전 포인트 (부록 A)</span>
+          </h4>
+          <span class="text-[11px] text-slate-400">성장 동력 vs 위험 요인 해부</span>
+        </div>
+
+        <!-- Bull Points -->
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-emerald-400 flex items-center space-x-1">
+            <i class="fas fa-arrow-trend-up"></i>
+            <span>핵심 성장 동력 (Bull Point)</span>
+          </span>
+          <ul id="book-catalysts-list" class="space-y-1.5 pl-1"></ul>
+        </div>
+
+        <!-- Bear Points -->
+        <div class="space-y-2 pt-2 border-t border-slate-800/60">
+          <span class="text-xs font-bold text-rose-400 flex items-center space-x-1">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span>반드시 점검할 리스크 (Bear Point)</span>
+          </span>
+          <ul id="book-risks-list" class="space-y-1.5 pl-1"></ul>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 7. 인터랙티브 What-If 매크로 시뮬레이터 (금리/유가 변동 시 주가 예측 즉각 재계산) -->
+    <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+              <i class="fas fa-sliders text-sky-400"></i>
+              <span>실시간 What-If 거시경제 충격 시뮬레이터</span>
+            </h3>
+            <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-bold">인터랙티브</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            슬라이더를 조절하면 10년물 국채 금리 할인율 공식에 따라 상단 차트의 미래 예상 주가 곡선이 실시간으로 동적 재계산됩니다.
+          </p>
+        </div>
+        <button id="sim-reset-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center space-x-1.5 self-start sm:self-auto">
+          <i class="fas fa-rotate-left text-[11px]"></i>
+          <span>기본값 복원</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+        
+        <!-- 슬라이더 1: 미 10년물 국채 금리 -->
+        <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-300 font-medium">美 10년물 국채 금리 (할인율)</span>
+            <span id="sim-val-rate" class="font-bold text-amber-300">4.42%</span>
+          </div>
+          <input type="range" id="sim-slider-rate" min="3.00" max="5.50" step="0.05" value="4.42" 
+                 class="w-full accent-sky-500 cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>3.0% (초호황/저금리)</span>
+            <span>4.42% (현재)</span>
+            <span>5.5% (금리 발작)</span>
+          </div>
+          <p class="text-[11px] text-slate-400">금리 상승 시 미래 이익의 현재 가치가 깎여 고PER 성장주 주가 하락 압력 발생 (책 10장)</p>
+        </div>
+
+        <!-- 슬라이더 2: 국제 유가 (WTI) -->
+        <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-300 font-medium">국제 유가 (WTI, $/배럴)</span>
+            <span id="sim-val-oil" class="font-bold text-slate-200">$71</span>
+          </div>
+          <input type="range" id="sim-slider-oil" min="50" max="110" step="1" value="71" 
+                 class="w-full accent-amber-500 cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>$50 (안정)</span>
+            <span>$71 (현재)</span>
+            <span>$110 (오일쇼크)</span>
+          </div>
+          <p class="text-[11px] text-slate-400">유가 급등 시 데이터센터 전력비 증가 & 인플레이션 자극으로 연준 긴축 연장 (책 11장)</p>
+        </div>
+
+        <!-- 슬라이더 3: 기업 실적 성장률 가중치 -->
+        <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-slate-300 font-medium">기업 매출/FCF 성장률 조정</span>
+            <span id="sim-val-growth" class="font-bold text-emerald-400">0%</span>
+          </div>
+          <input type="range" id="sim-slider-growth" min="-20" max="30" step="5" value="0" 
+                 class="w-full accent-emerald-500 cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>-20% (실적 둔화)</span>
+            <span>0% (현재 가이던스)</span>
+            <span>+30% (어닝 서프라이즈)</span>
+          </div>
+          <p class="text-[11px] text-slate-400">강력한 실적 퀀텀점프는 금리 상승이라는 모래주머니를 비웃듯 뚫고 올라감 (책 10장)</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 8. 포트폴리오 계산기 & 15대 체크리스트 & 뉴스 피드 (3열 복합) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- 1) 저자의 30:30:40 포트폴리오 시뮬레이터 -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="border-b border-slate-800 pb-2">
+          <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fas fa-calculator text-sky-400"></i>
+            <span>30:30:40 포트폴리오 배분기</span>
+          </h4>
+          <span class="text-[11px] text-slate-400">책 11장 흔들리지 않는 계좌 원칙</span>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs text-slate-400 block">투자 가능 여유 자금 (원화)</label>
+          <div class="flex space-x-2">
+            <input type="number" id="input-total-fund" value="10000000" step="1000000"
+                   class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+            <button id="btn-calc-portfolio" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold transition">
+              계산
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-2">
+          <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-sky-400">엔비디아 (30%)</span>
+              <span class="text-[10px] text-slate-400 block">AI 인프라 제왕 적립</span>
+            </div>
+            <span id="port-nvda-fund" class="font-bold text-slate-200">300만 원 (약 15주)</span>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-emerald-400">테슬라 (30%)</span>
+              <span class="text-[10px] text-slate-400 block">FSD & 로보택시 적립</span>
+            </div>
+            <span id="port-tsla-fund" class="font-bold text-slate-200">300만 원 (약 6주)</span>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-amber-950/20 border border-amber-500/30 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-amber-300">현금 대기 자금 (40%)</span>
+              <span id="port-cash-fund" class="font-bold text-amber-300">400만 원</span>
+            </div>
+            <div id="port-cash-plan">
+              <div class="text-[11px] text-slate-400 mt-1.5">
+                • <strong>공포탐욕지수 20 이하 시:</strong> 3회에 걸쳐 약 133만 원씩 분할 매수
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) 부록 C: 매수 전 15개 철통 체크리스트 -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div>
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fas fa-list-check text-emerald-400"></i>
+              <span>부록 C: 매수 전 철통 체크리스트</span>
+            </h4>
+            <span id="checklist-stock-target" class="text-[11px] text-sky-400 font-semibold">엔비디아 (NVDA)</span>
+          </div>
+          <span id="checklist-passed-count" class="text-xs font-black px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">0 / 15</span>
+        </div>
+
+        <div class="max-h-64 overflow-y-auto space-y-2 pr-1 text-xs">
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q1. 이 기업의 제품/핵심 고객을 명확히 설명할 수 있는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q2. 고객들이 타사로 갈아타지 않고 재구매하는 독점 이유를 아는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q3. 경쟁사가 넘볼 수 없는 기술력·플랫폼 락인 해자가 있는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q5. 매출, 영업이익, FCF가 추세적으로 우상향하는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q6. 현재 주가 가격표(PER)가 실질 성장 속도 대비 합리적인가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q9. FOMO(조급함)가 아니라 기업의 펀더멘털을 보고 사는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q10. 몰빵이 아닌 3~5회 분할 매수 계획을 세웠는가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q13. 주가가 -30% 폭락해도 일상에 지장 없는 여유자금인가?</span>
+          </label>
+          <label class="flex items-start space-x-2 p-1.5 rounded hover:bg-slate-800/40 cursor-pointer">
+            <input type="checkbox" class="check-item mt-0.5 accent-sky-500 rounded">
+            <span class="text-slate-300">Q15. 투자 가설 파괴 시 미련 없이 손절/파기할 기준을 세웠는가?</span>
+          </label>
+        </div>
+
+        <div id="checklist-evaluation" class="p-2.5 bg-slate-950/80 rounded-xl text-xs border border-slate-800">
+          <span class="text-slate-400">문항을 체크하여 매수 적합도를 진단하세요.</span>
+        </div>
+      </div>
+
+      <!-- 3) 최신 기업 뉴스 & 감성 분석 피드 -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
+          <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fas fa-newspaper text-sky-400"></i>
+            <span>최신 기업 뉴스 & 호재/악재 감성 분석</span>
+          </h4>
+          <span class="text-[10px] text-slate-400">실시간 피드</span>
+        </div>
+
+        <div id="news-feed-container" class="space-y-3 max-h-72 overflow-y-auto pr-1"></div>
+      </div>
+
+    </section>
+
+    <!-- 9. 부록 E 공식 공시 및 데이터 출처 안내 푸터 바 -->
+    <section class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-certificate text-sky-400"></i>
+        <span><strong>부록 E 공식 검증 데이터 출처:</strong> SEC EDGAR (10-K/10-Q), 연준 FOMC, 미 노동통계국(BLS), 미 경제분석국(BEA), 기업 IR 공식 공시</span>
+      </div>
+      <div class="text-[11px] text-slate-500">
+        © 2026 AI 시대, 미국 주식의 판이 바뀐다 (저자 김완수) · 실전 투자 가이드 엔진
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 데이터 및 스크립트 로드 -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
