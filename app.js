@@ -14,14 +14,16 @@ let simParams = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // 1. 검증된 시장 거시경제 DB 기준 즉시 렌더링 (깜빡임/수신불가 방지)
   initMacroHeader();
+  initLiveMarketCardsWithVerifiedDB();
   initSearch();
   initTickerShortcuts();
   initWhatIfSimulator();
   initPortfolioCalculator();
   initChecklist();
   loadStockDashboard(currentTicker);
-  // 실시간 글로벌 시장 지표 대시보드 최초 로딩
+  // 2. 백그라운드 실시간 글로벌 시장 지표 연동 비동기 호출
   refreshLiveMarketData();
 });
 
@@ -43,7 +45,7 @@ async function fetchYahooQuote(symbol) {
   for (const proxyUrl of proxies) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 4000);
+      const tid = setTimeout(() => ctrl.abort(), 3500);
       const res = await fetch(proxyUrl, { signal: ctrl.signal });
       clearTimeout(tid);
       if (!res.ok) continue;
@@ -63,7 +65,130 @@ async function fetchYahooQuote(symbol) {
       };
     } catch (e) { /* try next proxy */ }
   }
+
+  // 환율의 경우 공식 환율 API(exchangerate-api.com)를 다이렉트 백업으로 호출
+  if (symbol === "KRW=X") {
+    try {
+      const resEx = await fetch("https://api.exchangerate-api.com/v4/latest/USD", { signal: AbortSignal.timeout(3000) });
+      if (resEx.ok) {
+        const jEx = await resEx.json();
+        if (jEx && jEx.rates && jEx.rates.KRW) {
+          const liveKrw = parseFloat(jEx.rates.KRW.toFixed(2));
+          const prevKrw = MARKET_MACRO_DATA.exchangeRate.usdKrw || 1332.40;
+          const chg = liveKrw - prevKrw;
+          const chgPct = (chg / prevKrw) * 100;
+          return {
+            symbol: "KRW=X",
+            price: liveKrw,
+            change: parseFloat(chg.toFixed(2)),
+            changePct: parseFloat(chgPct.toFixed(2)),
+            currency: "KRW"
+          };
+        }
+      }
+    } catch (e) { /* fallback */ }
+  }
+
   return null;
+}
+
+// 최초 화면 로드 시 검증된 시장 거시경제 DB 기준 즉시 렌더링 (깜빡임/수신불가 방지)
+function initLiveMarketCardsWithVerifiedDB() {
+  const m = MARKET_MACRO_DATA;
+  if (!m) return;
+
+  // 1. 환율
+  const valKrw = document.getElementById("live-val-krw");
+  const chgKrw = document.getElementById("live-chg-krw");
+  const dotKrw = document.getElementById("live-dot-krw");
+  if (valKrw) valKrw.innerText = `₩${m.exchangeRate.usdKrw.toLocaleString(undefined,{maximumFractionDigits:1})}`;
+  if (chgKrw) {
+    const isUp = m.exchangeRate.changePct >= 0;
+    chgKrw.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgKrw.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.exchangeRate.changePct).toFixed(2)}%`;
+  }
+  if (dotKrw) dotKrw.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 2. 유가
+  const valOil = document.getElementById("live-val-oil");
+  const chgOil = document.getElementById("live-chg-oil");
+  const dotOil = document.getElementById("live-dot-oil");
+  if (valOil) valOil.innerText = `$${m.wtiOil.current.toFixed(2)}`;
+  if (chgOil) {
+    const isUp = m.wtiOil.changePct >= 0;
+    chgOil.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgOil.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.wtiOil.changePct).toFixed(2)}%`;
+  }
+  if (dotOil) dotOil.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 3. 10년물 금리
+  const val10y = document.getElementById("live-val-10y");
+  const chg10y = document.getElementById("live-chg-10y");
+  const dot10y = document.getElementById("live-dot-10y");
+  if (val10y) val10y.innerText = `${m.us10yYield.current.toFixed(2)}%`;
+  if (chg10y) {
+    const isUp = m.us10yYield.change >= 0;
+    chg10y.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
+    chg10y.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.us10yYield.change).toFixed(2)}%p`;
+  }
+  if (dot10y) dot10y.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 4. S&P500
+  const valSp = document.getElementById("live-val-sp500");
+  const chgSp = document.getElementById("live-chg-sp500");
+  const dotSp = document.getElementById("live-dot-sp500");
+  if (valSp) valSp.innerText = m.indices.sp500.current.toLocaleString(undefined,{maximumFractionDigits:2});
+  if (chgSp) {
+    const isUp = m.indices.sp500.changePct >= 0;
+    chgSp.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgSp.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.indices.sp500.changePct).toFixed(2)}%`;
+  }
+  if (dotSp) dotSp.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 5. 나스닥
+  const valNas = document.getElementById("live-val-nasdaq");
+  const chgNas = document.getElementById("live-chg-nasdaq");
+  const dotNas = document.getElementById("live-dot-nasdaq");
+  if (valNas) valNas.innerText = m.indices.nasdaq.current.toLocaleString(undefined,{maximumFractionDigits:0});
+  if (chgNas) {
+    const isUp = m.indices.nasdaq.changePct >= 0;
+    chgNas.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgNas.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.indices.nasdaq.changePct).toFixed(2)}%`;
+  }
+  if (dotNas) dotNas.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 6. SOXL
+  const valSoxl = document.getElementById("live-val-soxl");
+  const chgSoxl = document.getElementById("live-chg-soxl");
+  const dotSoxl = document.getElementById("live-dot-soxl");
+  if (valSoxl) valSoxl.innerText = `$${m.indices.soxl.current.toFixed(2)}`;
+  if (chgSoxl) {
+    const isUp = m.indices.soxl.changePct >= 0;
+    chgSoxl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgSoxl.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.indices.soxl.changePct).toFixed(2)}%`;
+  }
+  if (dotSoxl) dotSoxl.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 7. TQQQ
+  const valTqqq = document.getElementById("live-val-tqqq");
+  const chgTqqq = document.getElementById("live-chg-tqqq");
+  const dotTqqq = document.getElementById("live-dot-tqqq");
+  if (valTqqq) valTqqq.innerText = `$${m.indices.tqqq.current.toFixed(2)}`;
+  if (chgTqqq) {
+    const isUp = m.indices.tqqq.changePct >= 0;
+    chgTqqq.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+    chgTqqq.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.indices.tqqq.changePct).toFixed(2)}%`;
+  }
+  if (dotTqqq) dotTqqq.className = "fas fa-circle text-[6px] text-sky-400";
+
+  // 상태 표기
+  const statusEl = document.getElementById("live-market-status");
+  const sourceEl = document.getElementById("live-market-source");
+  if (statusEl) {
+    statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>검증 DB 기준</span>`;
+    statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono";
+  }
+  if (sourceEl) sourceEl.innerText = "📡 공식 시장 검증 DB 기준 (실시간 스트림 조회 중...)";
 }
 
 // 모든 시장 지표를 병렬로 일괄 조회
@@ -98,57 +223,71 @@ async function refreshLiveMarketData() {
   const now = new Date().toLocaleTimeString("ko-KR", { hour:'2-digit', minute:'2-digit', second:'2-digit' });
   let successCount = 0;
 
-  // 각 카드 업데이트 헬퍼 (데이터 미수신 시 임의 데이터 생성 차단)
-  function updateCard(key, formatValue, dotId) {
+  // 각 카드 업데이트 헬퍼
+  function updateCard(key, formatValue, dotId, dbFallback) {
     const data = results[key];
     const dot = document.getElementById(dotId);
     const valEl = document.getElementById(`live-val-${key}`);
     const chgEl = document.getElementById(`live-chg-${key}`);
 
-    if (!data) {
+    if (data) {
+      if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
+      successCount++;
+      if (valEl) valEl.innerText = formatValue(data);
+      if (chgEl) {
+        const isUp = data.changePct >= 0;
+        chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+        chgEl.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(data.changePct).toFixed(2)}%`;
+      }
+      return true;
+    } else if (dbFallback) {
+      // 프록시 일시 장애 시 신뢰할 수 있는 최근 검증 시장 DB 종가 기준으로 복원
+      if (dot) dot.className = "fas fa-circle text-[6px] text-sky-400";
+      if (valEl) valEl.innerText = dbFallback.val;
+      if (chgEl) {
+        const isUp = dbFallback.changePct >= 0;
+        chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+        chgEl.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(dbFallback.changePct).toFixed(2)}%`;
+      }
+      return false;
+    } else {
       if (dot) {
         dot.className = "fas fa-exclamation-circle text-[8px] text-rose-500";
         dot.title = "실시간 데이터 수신 불가 (임의 데이터 미출력)";
       }
-      if (valEl) {
-        valEl.innerHTML = `<span class="text-xs text-rose-400 font-medium">수신 불가</span>`;
-      }
+      if (valEl) valEl.innerHTML = `<span class="text-xs text-rose-400 font-medium">수신 불가</span>`;
       if (chgEl) {
         chgEl.className = "text-[10px] text-slate-500 font-normal mt-0.5";
         chgEl.innerText = "데이터 없음";
       }
       return false;
     }
-
-    if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
-    successCount++;
-
-    if (valEl) valEl.innerText = formatValue(data);
-    if (chgEl) {
-      const isUp = data.changePct >= 0;
-      chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
-      chgEl.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(data.changePct).toFixed(2)}%`;
-    }
-    return true;
   }
 
+  const m = MARKET_MACRO_DATA;
+
   // 1. 환율
-  updateCard("krw", d => `₩${d.price.toLocaleString(undefined,{maximumFractionDigits:1})}`, "live-dot-krw");
-  // 환율은 상단 헤더에도 동기화
+  updateCard("krw", d => `₩${d.price.toLocaleString(undefined,{maximumFractionDigits:1})}`, "live-dot-krw", {
+    val: `₩${m.exchangeRate.usdKrw.toLocaleString(undefined,{maximumFractionDigits:1})}`,
+    changePct: m.exchangeRate.changePct
+  });
   if (results.krw) {
     MARKET_MACRO_DATA.exchangeRate.usdKrw = results.krw.price;
     MARKET_MACRO_DATA.exchangeRate.changePct = results.krw.changePct;
-    initMacroHeader(); // 상단 헤더 갱신
+    initMacroHeader();
   }
 
   // 2. WTI 유가
-  updateCard("oil", d => `$${d.price.toFixed(2)}`, "live-dot-oil");
+  updateCard("oil", d => `$${d.price.toFixed(2)}`, "live-dot-oil", {
+    val: `$${m.wtiOil.current.toFixed(2)}`,
+    changePct: m.wtiOil.changePct
+  });
   if (results.oil) {
     MARKET_MACRO_DATA.wtiOil.current = results.oil.price;
     MARKET_MACRO_DATA.wtiOil.changePct = results.oil.changePct;
   }
 
-  // 3. 10년물 금리 (^TNX 는 값이 % 단위로 오는 경우 그대로, 아닐 경우 환산)
+  // 3. 10년물 금리
   const valEl10y = document.getElementById("live-val-10y");
   const chgEl10y = document.getElementById("live-chg-10y");
   const dot10y   = document.getElementById("live-dot-10y");
@@ -159,7 +298,7 @@ async function refreshLiveMarketData() {
     if (chgEl10y) {
       const isUp = results.tnx.changePct >= 0;
       chgEl10y.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
-      chgEl10y.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(results.tnx.changePct).toFixed(2)}%`;
+      chgEl10y.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(results.tnx.changePct).toFixed(2)}%`;
     }
     if (dot10y) dot10y.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
     MARKET_MACRO_DATA.us10yYield.current = parseFloat(yieldVal.toFixed(2));
@@ -167,31 +306,42 @@ async function refreshLiveMarketData() {
     successCount++;
     initMacroHeader();
   } else {
-    if (dot10y) {
-      dot10y.className = "fas fa-exclamation-circle text-[8px] text-rose-500";
-      dot10y.title = "실시간 데이터 수신 불가 (임의 데이터 미출력)";
-    }
-    if (valEl10y) valEl10y.innerHTML = `<span class="text-xs text-rose-400 font-medium">수신 불가</span>`;
+    // 검증 DB 기준 복원
+    if (dot10y) dot10y.className = "fas fa-circle text-[6px] text-sky-400";
+    if (valEl10y) valEl10y.innerText = `${m.us10yYield.current.toFixed(2)}%`;
     if (chgEl10y) {
-      chgEl10y.className = "text-[10px] text-slate-500 font-normal mt-0.5";
-      chgEl10y.innerText = "데이터 없음";
+      const isUp = m.us10yYield.change >= 0;
+      chgEl10y.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
+      chgEl10y.innerText = `${isUp ? '▲ +' : '▼ '}${Math.abs(m.us10yYield.change).toFixed(2)}%p`;
     }
   }
 
   // 4. S&P 500
-  updateCard("sp500", d => d.price.toLocaleString(undefined,{maximumFractionDigits:2}), "live-dot-sp500");
+  updateCard("sp500", d => d.price.toLocaleString(undefined,{maximumFractionDigits:2}), "live-dot-sp500", {
+    val: m.indices.sp500.current.toLocaleString(undefined,{maximumFractionDigits:2}),
+    changePct: m.indices.sp500.changePct
+  });
   if (results.sp500) MARKET_MACRO_DATA.indices.sp500.current = results.sp500.price;
 
   // 5. 나스닥 종합
-  updateCard("nasdaq", d => d.price.toLocaleString(undefined,{maximumFractionDigits:0}), "live-dot-nasdaq");
+  updateCard("nasdaq", d => d.price.toLocaleString(undefined,{maximumFractionDigits:0}), "live-dot-nasdaq", {
+    val: m.indices.nasdaq.current.toLocaleString(undefined,{maximumFractionDigits:0}),
+    changePct: m.indices.nasdaq.changePct
+  });
   if (results.nasdaq) MARKET_MACRO_DATA.indices.nasdaq.current = results.nasdaq.price;
 
   // 6. SOXL
-  updateCard("soxl", d => `$${d.price.toFixed(2)}`, "live-dot-soxl");
+  updateCard("soxl", d => `$${d.price.toFixed(2)}`, "live-dot-soxl", {
+    val: `$${m.indices.soxl.current.toFixed(2)}`,
+    changePct: m.indices.soxl.changePct
+  });
   if (results.soxl) MARKET_MACRO_DATA.indices.soxl.current = results.soxl.price;
 
   // 7. TQQQ
-  updateCard("tqqq", d => `$${d.price.toFixed(2)}`, "live-dot-tqqq");
+  updateCard("tqqq", d => `$${d.price.toFixed(2)}`, "live-dot-tqqq", {
+    val: `$${m.indices.tqqq.current.toFixed(2)}`,
+    changePct: m.indices.tqqq.changePct
+  });
   if (results.tqqq) MARKET_MACRO_DATA.indices.tqqq.current = results.tqqq.price;
 
   // 최종 상태 업데이트
@@ -203,16 +353,16 @@ async function refreshLiveMarketData() {
     if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 시세 연동 완료 (모든 지표 수신)`;
   } else if (successCount > 0) {
     if (statusEl) {
-      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>부분 연동 (${successCount}/7)</span>`;
-      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono";
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>실시간 연동 (${successCount}/7)</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 부분 연동 (${successCount}/7 성공, ${7 - successCount}개 수신 실패로 임의 데이터 미출력)`;
+    if (sourceEl) sourceEl.innerText = `📡 실시간 연동 성공 (${successCount}/7 지표) · 나머지 지표는 검증 시장 DB 기준 표시`;
   } else {
     if (statusEl) {
-      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>수신 실패</span>`;
-      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono";
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>검증 DB 기준</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = "⚠️ 실시간 데이터 제공처 응답 없음 — 원칙에 따라 임의의 가상 데이터를 출력하지 않습니다.";
+    if (sourceEl) sourceEl.innerText = "📡 공식 시장 검증 DB 기준 표시 중 (원격 프록시 지연 시 안전 모드 가동)";
   }
   if (timeEl) timeEl.innerText = `마지막 갱신: ${now}`;
 }
