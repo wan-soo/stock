@@ -131,7 +131,7 @@
             <span>🇺🇸🇰🇷 USD/KRW</span>
             <i class="fas fa-circle text-[6px] text-slate-600 group-hover:text-emerald-400 transition" id="live-dot-krw"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-krw">₩1,332</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-krw"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-krw">--</div>
         </div>
 
@@ -141,7 +141,7 @@
             <span>🛢️ WTI 유가</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-oil"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-oil">$88.92</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-oil"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-oil">--</div>
         </div>
 
@@ -151,7 +151,7 @@
             <span>📊 美 10년물 금리</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-10y"></i>
           </div>
-          <div class="text-base font-black text-amber-300 mt-1" id="live-val-10y">5.15%</div>
+          <div class="text-base font-black text-amber-300 mt-1" id="live-val-10y"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-10y">--</div>
         </div>
 
@@ -168,7 +168,7 @@
             <span>📈 S&P 500</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-sp500"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-sp500">7,561.67</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-sp500"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-sp500">--</div>
         </div>
 
@@ -178,7 +178,7 @@
             <span>💻 나스닥 종합</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-nasdaq"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-nasdaq">25,136</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-nasdaq"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-nasdaq">--</div>
         </div>
 
@@ -188,7 +188,7 @@
             <span>🔥 SOXL</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-soxl"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-soxl">$58.32</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-soxl"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-soxl">--</div>
           <div class="text-[9px] text-slate-500 mt-0.5">반도체 3X 레버리지</div>
         </div>
@@ -199,7 +199,7 @@
             <span>⚡ TQQQ</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-tqqq"></i>
           </div>
-          <div class="text-base font-black text-white mt-1" id="live-val-tqqq">$58.08</div>
+          <div class="text-base font-black text-white mt-1" id="live-val-tqqq"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-tqqq">--</div>
           <div class="text-[9px] text-slate-500 mt-0.5">나스닥 3X 레버리지</div>
         </div>
@@ -444,7 +444,25 @@
           </div>
 
           <!-- 차트 영역 -->
-          <div class="relative w-full h-[360px] sm:h-[420px] mt-4">
+          <div id="chart-canvas-wrapper" class="relative w-full h-[360px] sm:h-[420px] mt-4 flex items-center justify-center">
+            <!-- 데이터 수신 불가 시 안내 플레이스홀더 (임의 데이터 생성 차단 원칙) -->
+            <div id="chart-error-placeholder" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-900/95 rounded-xl border border-rose-500/40 text-center z-10">
+              <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center text-2xl mb-3 shadow-lg shadow-rose-950/50">
+                <i class="fas fa-chart-line-down"></i>
+              </div>
+              <h4 class="text-base font-bold text-white mb-1.5 flex items-center space-x-2">
+                <span>⚠️ 주가 차트 데이터를 불러올 수 없습니다</span>
+              </h4>
+              <p id="chart-error-msg" class="text-xs text-slate-300 max-w-md leading-relaxed mb-4">
+                실시간 거래소 API 응답이 없거나 공시된 과거 거래 내역을 확보할 수 없습니다.<br>
+                신뢰성 원칙에 따라 임의의 가상 데이터를 생성하지 않고 차트 출력을 중단했습니다.
+              </p>
+              <div class="inline-flex items-center space-x-2 text-[11px] text-amber-300 bg-amber-500/10 px-3.5 py-1.5 rounded-lg border border-amber-500/30">
+                <i class="fas fa-shield-alt"></i>
+                <span class="font-medium">원칙 준수: 미검증 가상 주가 및 가짜 차트 생성 차단</span>
+              </div>
+            </div>
+
             <canvas id="stock-prediction-chart"></canvas>
           </div>
         </div>

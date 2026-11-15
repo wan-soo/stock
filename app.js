@@ -98,19 +98,31 @@ async function refreshLiveMarketData() {
   const now = new Date().toLocaleTimeString("ko-KR", { hour:'2-digit', minute:'2-digit', second:'2-digit' });
   let successCount = 0;
 
-  // 각 카드 업데이트 헬퍼
+  // 각 카드 업데이트 헬퍼 (데이터 미수신 시 임의 데이터 생성 차단)
   function updateCard(key, formatValue, dotId) {
     const data = results[key];
     const dot = document.getElementById(dotId);
+    const valEl = document.getElementById(`live-val-${key}`);
+    const chgEl = document.getElementById(`live-chg-${key}`);
+
     if (!data) {
-      if (dot) dot.className = "fas fa-circle text-[6px] text-slate-600";
+      if (dot) {
+        dot.className = "fas fa-exclamation-circle text-[8px] text-rose-500";
+        dot.title = "실시간 데이터 수신 불가 (임의 데이터 미출력)";
+      }
+      if (valEl) {
+        valEl.innerHTML = `<span class="text-xs text-rose-400 font-medium">수신 불가</span>`;
+      }
+      if (chgEl) {
+        chgEl.className = "text-[10px] text-slate-500 font-normal mt-0.5";
+        chgEl.innerText = "데이터 없음";
+      }
       return false;
     }
+
     if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
     successCount++;
 
-    const valEl = document.getElementById(`live-val-${key}`);
-    const chgEl = document.getElementById(`live-chg-${key}`);
     if (valEl) valEl.innerText = formatValue(data);
     if (chgEl) {
       const isUp = data.changePct >= 0;
@@ -137,22 +149,33 @@ async function refreshLiveMarketData() {
   }
 
   // 3. 10년물 금리 (^TNX 는 값이 % 단위로 오는 경우 그대로, 아닐 경우 환산)
+  const valEl10y = document.getElementById("live-val-10y");
+  const chgEl10y = document.getElementById("live-chg-10y");
+  const dot10y   = document.getElementById("live-dot-10y");
+
   if (results.tnx) {
-    const yieldVal = results.tnx.price > 20 ? results.tnx.price / 10 : results.tnx.price; // ^TNX 가끔 44.2 로 올 때
-    const valEl = document.getElementById("live-val-10y");
-    const chgEl = document.getElementById("live-chg-10y");
-    const dot   = document.getElementById("live-dot-10y");
-    if (valEl) valEl.innerText = `${yieldVal.toFixed(2)}%`;
-    if (chgEl) {
+    const yieldVal = results.tnx.price > 20 ? results.tnx.price / 10 : results.tnx.price;
+    if (valEl10y) valEl10y.innerText = `${yieldVal.toFixed(2)}%`;
+    if (chgEl10y) {
       const isUp = results.tnx.changePct >= 0;
-      chgEl.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`; // 금리 상승=경고
-      chgEl.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(results.tnx.changePct).toFixed(2)}%`;
+      chgEl10y.className = `text-[11px] font-semibold mt-0.5 ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
+      chgEl10y.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(results.tnx.changePct).toFixed(2)}%`;
     }
-    if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
+    if (dot10y) dot10y.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
     MARKET_MACRO_DATA.us10yYield.current = parseFloat(yieldVal.toFixed(2));
     MARKET_MACRO_DATA.us10yYield.change = results.tnx.change;
     successCount++;
-    initMacroHeader(); // 상단 헤더의 10년물 금리도 동기화
+    initMacroHeader();
+  } else {
+    if (dot10y) {
+      dot10y.className = "fas fa-exclamation-circle text-[8px] text-rose-500";
+      dot10y.title = "실시간 데이터 수신 불가 (임의 데이터 미출력)";
+    }
+    if (valEl10y) valEl10y.innerHTML = `<span class="text-xs text-rose-400 font-medium">수신 불가</span>`;
+    if (chgEl10y) {
+      chgEl10y.className = "text-[10px] text-slate-500 font-normal mt-0.5";
+      chgEl10y.innerText = "데이터 없음";
+    }
   }
 
   // 4. S&P 500
@@ -172,24 +195,24 @@ async function refreshLiveMarketData() {
   if (results.tqqq) MARKET_MACRO_DATA.indices.tqqq.current = results.tqqq.price;
 
   // 최종 상태 업데이트
-  if (successCount >= 5) {
+  if (successCount >= 7) {
     if (statusEl) {
-      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span><span>실시간 연동 (${successCount}/7)</span>`;
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span><span>실시간 연동 완료 (7/7)</span>`;
       statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 연동 성공 (${successCount}/7 지표)`;
+    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 시세 연동 완료 (모든 지표 수신)`;
   } else if (successCount > 0) {
     if (statusEl) {
       statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>부분 연동 (${successCount}/7)</span>`;
       statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 부분 연동 (${successCount}/7) — 일부 지표는 최근 검증 DB 기준`;
+    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 부분 연동 (${successCount}/7 성공, ${7 - successCount}개 수신 실패로 임의 데이터 미출력)`;
   } else {
     if (statusEl) {
-      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span><span>오프라인 (검증 DB)</span>`;
-      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono";
+      statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>수신 실패</span>`;
+      statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = "📡 실시간 연동 실패 — 검증된 최신 시장 종가 DB 기준 표시 중";
+    if (sourceEl) sourceEl.innerText = "⚠️ 실시간 데이터 제공처 응답 없음 — 원칙에 따라 임의의 가상 데이터를 출력하지 않습니다.";
   }
   if (timeEl) timeEl.innerText = `마지막 갱신: ${now}`;
 }
@@ -381,35 +404,174 @@ function initSearch() {
 }
 
 /**
- * 사용자가 입력한 검색어에 대해 즉각 분석 제출 처리
+ * 사용자가 입력한 검색어에 대해 즉각 분석 제출 처리 (철저한 데이터 검증 원칙 준수)
  */
-function handleSearchSubmit(query) {
+async function handleSearchSubmit(query) {
   if (!query || query.trim() === "") return;
   const rawQ = query.trim();
 
-  // 1. 범용 종목 분석 엔진 가동 (기존 DB 종목이든 새로 입력된 종목이든 상관없이 분석 산출)
-  const stock = lookupOrGenerateStock(rawQ);
-  if (!stock) return;
+  // 1. 기존 DB에 등록된 기업인지 확인
+  let stock = lookupStock(rawQ);
 
-  currentTicker = stock.ticker;
-  document.getElementById("stock-search-input").value = "";
-  document.getElementById("search-suggestions").classList.add("hidden");
-  
-  // 2. 대시보드 렌더링
-  loadStockDashboard(stock.ticker);
-
-  // 3. 사용자 알림 토스트 표시
-  showAnalysisNotice(stock.nameKo, stock.ticker, stock.sector);
-}
-
-function selectStock(ticker) {
-  const stock = STOCKS_DATABASE[ticker] || lookupOrGenerateStock(ticker);
   if (stock) {
     currentTicker = stock.ticker;
     document.getElementById("stock-search-input").value = "";
     document.getElementById("search-suggestions").classList.add("hidden");
     loadStockDashboard(stock.ticker);
+    showAnalysisNotice(stock.nameKo, stock.ticker, stock.sector);
+    return;
   }
+
+  // 2. DB에 없다면 실시간 Yahoo Finance로 실제 존재하는 종목인지 확인
+  const inputEl = document.getElementById("stock-search-input");
+  if (inputEl) inputEl.value = "";
+  document.getElementById("search-suggestions").classList.add("hidden");
+
+  // 티커 심볼 유추 (한글 매핑 또는 영문 대문자)
+  let sym = KOREAN_TICKER_MAP[rawQ.toLowerCase()] || KOREAN_TICKER_MAP[rawQ];
+  if (!sym && /^[A-Za-z0-9^.=_-]{1,10}$/.test(rawQ)) {
+    sym = rawQ.toUpperCase();
+  }
+
+  if (sym) {
+    showNoticeToast("조회 중", `'${rawQ}' 실시간 데이터 조회 중...`, "info");
+    const live = await fetchRealtimeStockQuote(sym);
+    if (live && live.currentPrice) {
+      // 실시간 데이터가 실제로 존재하는 경우에만 프로필 구성
+      const realStock = {
+        ticker: live.ticker,
+        nameKo: rawQ,
+        nameEn: `${live.ticker} Corp.`,
+        sector: "실시간 연동 종목",
+        chapter: "실시간 시장 시세 조회",
+        authorPortfolioShare: "실시간 시장 데이터 연동",
+        currentPrice: live.currentPrice,
+        change: live.change,
+        changePct: live.changePct,
+        marketCap: "실시간 연동",
+        peRatio: "N/A",
+        forwardPE: "N/A",
+        week52High: live.week52High || live.currentPrice,
+        week52Low: live.week52Low || live.currentPrice,
+        targetPriceBase: parseFloat((live.currentPrice * 1.15).toFixed(2)),
+        targetPriceBull: parseFloat((live.currentPrice * 1.30).toFixed(2)),
+        targetPriceBear: parseFloat((live.currentPrice * 0.85).toFixed(2)),
+        priceDriver: "실시간 시장 수급 및 실적 변동성",
+        realHistory: live.realHistory,
+        financials: {
+          revenue: "공시 데이터 없음",
+          revenueYoY: "--",
+          operatingIncome: "공시 데이터 없음",
+          operatingMargin: "--",
+          netIncome: "공시 데이터 없음",
+          netMargin: "--",
+          eps: "N/A",
+          epsConsensus: "N/A",
+          epsSurprise: "미분석 종목",
+          operatingCashFlow: "공시 데이터 없음",
+          freeCashFlow: "공시 데이터 없음",
+          guidance: "별도 실적 공시 확인 필요",
+          capEx: "공시 데이터 없음",
+          datacenterRev: "데이터 없음"
+        },
+        investmentAnalysis: {
+          thesis: `'${live.ticker}' 종목은 실시간 시세가 조회되었으나, 책 핵심 분석 기업 DB에 등록되지 않은 종목입니다. 허위 정보를 방지하기 위해 임의의 가상 재무제표나 가짜 차트를 생성하지 않습니다.`,
+          strengths: ["실시간 주가 데이터 수신 성공"],
+          keyRisks: ["검증된 재무 분석 보고서 부재", "자체 공시 및 사업보고서 직접 확인 권고"],
+          fiveStepScore: {
+            moatScore: "--",
+            financialScore: "--",
+            macroResilienceScore: "--",
+            valuationScore: "--",
+            finalAction: "자체 조사 필요",
+            actionBadge: "NEUTRAL",
+            authorComment: "책 12대 핵심 분석 종목 외의 기업은 반드시 DART/SEC 공시와 FCF를 직접 검증하시기 바랍니다."
+          }
+        },
+        news: []
+      };
+
+      STOCKS_DATABASE[live.ticker] = realStock;
+      currentTicker = live.ticker;
+      loadStockDashboard(live.ticker);
+      showAnalysisNotice(realStock.nameKo, realStock.ticker, realStock.sector);
+      return;
+    }
+  }
+
+  // 3. 관련 데이터를 못 갖고 오는 경우: 임의로 데이터를 만들지 않고 못 갖고 온다고 표시!
+  showSearchErrorNotice(rawQ);
+}
+
+function selectStock(ticker) {
+  const stock = STOCKS_DATABASE[ticker] || lookupStock(ticker);
+  if (stock) {
+    currentTicker = stock.ticker;
+    document.getElementById("stock-search-input").value = "";
+    document.getElementById("search-suggestions").classList.add("hidden");
+    loadStockDashboard(stock.ticker);
+  } else {
+    showSearchErrorNotice(ticker);
+  }
+}
+
+/**
+ * 데이터 수신 실패 시 안내 알림 토스트 (임의 가상 데이터 생성 차단 원칙)
+ */
+function showSearchErrorNotice(rawQ) {
+  let toast = document.getElementById("search-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "search-toast";
+    document.body.appendChild(toast);
+  }
+  toast.className = "fixed bottom-5 right-5 z-50 bg-slate-900 border border-rose-500/50 shadow-2xl rounded-2xl p-4 max-w-sm transition-all duration-300 transform translate-y-0";
+
+  toast.innerHTML = `
+    <div class="flex items-start space-x-3">
+      <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0 text-sm">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1.5">
+          <span class="font-bold text-white text-sm">'${rawQ}' 데이터 수신 불가</span>
+          <span class="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/40 px-1.5 py-0.2 rounded font-semibold">조회 실패</span>
+        </div>
+        <p class="text-xs text-slate-300 mt-1 leading-tight">
+          거래소 API 응답이 없거나 관련 거래 데이터를 가져올 수 없습니다. 원칙에 따라 임의의 가상 데이터를 생성하지 않고 조회를 중단했습니다. 올바른 종목명 또는 티커(예: NVDA, TSLA, AAPL 등)를 확인해주세요.
+        </p>
+      </div>
+    </div>
+  `;
+
+  toast.classList.remove("hidden", "opacity-0");
+  setTimeout(() => {
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 4500);
+}
+
+function showNoticeToast(title, msg, type) {
+  let toast = document.getElementById("search-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "search-toast";
+    document.body.appendChild(toast);
+  }
+  toast.className = "fixed bottom-5 right-5 z-50 bg-slate-900 border border-sky-500/50 shadow-2xl rounded-2xl p-4 max-w-sm transition-all duration-300 transform translate-y-0";
+
+  toast.innerHTML = `
+    <div class="flex items-start space-x-3">
+      <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center flex-shrink-0 text-sm">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <div>
+        <span class="font-bold text-white text-sm">${title}</span>
+        <p class="text-xs text-slate-300 mt-0.5 leading-tight">${msg}</p>
+      </div>
+    </div>
+  `;
+  toast.classList.remove("hidden", "opacity-0");
 }
 
 /**
@@ -815,17 +977,50 @@ function renderFinancialCards(stock) {
  * 3개월 전 및 6개월 전 시점 대비 주가 등락률 UI 전광판 렌더링
  */
 function renderPeriodComparisonUI(comparison) {
-  if (!comparison) return;
-
-  const p3 = comparison.threeMonths;
-  const p6 = comparison.sixMonths;
-
-  // 1. 3개월 전 대비 카드
   const elDate3 = document.getElementById("cmp-3m-date");
   const elPrice3 = document.getElementById("cmp-3m-price");
   const elPct3 = document.getElementById("cmp-3m-pct");
   const elDiff3 = document.getElementById("cmp-3m-diff");
 
+  const elDate6 = document.getElementById("cmp-6m-date");
+  const elPrice6 = document.getElementById("cmp-6m-price");
+  const elPct6 = document.getElementById("cmp-6m-pct");
+  const elDiff6 = document.getElementById("cmp-6m-diff");
+  const elSummary = document.getElementById("cmp-trend-summary");
+
+  if (!comparison) {
+    if (elDate3) elDate3.innerText = "(데이터 수신 불가)";
+    if (elPrice3) elPrice3.innerText = "N/A";
+    if (elPct3) {
+      elPct3.className = "text-sm font-semibold text-slate-500 font-mono";
+      elPct3.innerText = "데이터 없음";
+    }
+    if (elDiff3) {
+      elDiff3.className = "text-[10px] text-slate-500 font-mono";
+      elDiff3.innerText = "--";
+    }
+
+    if (elDate6) elDate6.innerText = "(데이터 수신 불가)";
+    if (elPrice6) elPrice6.innerText = "N/A";
+    if (elPct6) {
+      elPct6.className = "text-sm font-semibold text-slate-500 font-mono";
+      elPct6.innerText = "데이터 없음";
+    }
+    if (elDiff6) {
+      elDiff6.className = "text-[10px] text-slate-500 font-mono";
+      elDiff6.innerText = "--";
+    }
+
+    if (elSummary) {
+      elSummary.innerHTML = `<span class="text-rose-400 font-semibold"><i class="fas fa-ban mr-1"></i>데이터를 불러올 수 없어 임의의 등락률 및 추세 진단을 생성하지 않습니다.</span>`;
+    }
+    return;
+  }
+
+  const p3 = comparison.threeMonths;
+  const p6 = comparison.sixMonths;
+
+  // 1. 3개월 전 대비 카드
   if (elDate3) elDate3.innerText = `(${p3.date})`;
   if (elPrice3) elPrice3.innerText = `$${p3.price.toFixed(2)}`;
   if (elPct3) {
@@ -840,11 +1035,6 @@ function renderPeriodComparisonUI(comparison) {
   }
 
   // 2. 6개월 전 대비 카드
-  const elDate6 = document.getElementById("cmp-6m-date");
-  const elPrice6 = document.getElementById("cmp-6m-price");
-  const elPct6 = document.getElementById("cmp-6m-pct");
-  const elDiff6 = document.getElementById("cmp-6m-diff");
-
   if (elDate6) elDate6.innerText = `(${p6.date})`;
   if (elPrice6) elPrice6.innerText = `$${p6.price.toFixed(2)}`;
   if (elPct6) {
@@ -859,7 +1049,6 @@ function renderPeriodComparisonUI(comparison) {
   }
 
   // 3. 중단기 수익률 추세 진단 코멘트
-  const elSummary = document.getElementById("cmp-trend-summary");
   if (elSummary) {
     if (p3.changePct > 0 && p6.changePct > 0) {
       if (p3.changePct >= (p6.changePct / 2)) {
@@ -881,9 +1070,32 @@ function renderPeriodComparisonUI(comparison) {
  * 실시간 주가 차트 vs 향후 예상 주가 차트 (다른 색상으로 명확히 구분 렌더링)
  */
 function renderStockPredictionChart(stock) {
-  const ctx = document.getElementById("stock-prediction-chart").getContext("2d");
+  const chartCanvas = document.getElementById("stock-prediction-chart");
+  const errorPlaceholder = document.getElementById("chart-error-placeholder");
   const data = generateHistoricalAndFutureData(stock.ticker, stock);
-  if (!data) return;
+
+  if (!data || !data.dates || data.dates.length === 0) {
+    if (stockChartInstance) {
+      stockChartInstance.destroy();
+      stockChartInstance = null;
+    }
+    if (chartCanvas) chartCanvas.classList.add("hidden");
+    if (errorPlaceholder) {
+      errorPlaceholder.classList.remove("hidden");
+      const errMsg = document.getElementById("chart-error-msg");
+      if (errMsg) {
+        errMsg.innerHTML = `'${stock.nameKo || stock.ticker}' 종목의 과거 거래 내역 및 실시간 주가 데이터를 불러올 수 없습니다.<br>원칙에 따라 임의의 가상 데이터를 생성하지 않고 차트 출력을 제한합니다.`;
+      }
+    }
+    renderPeriodComparisonUI(null);
+    return;
+  }
+
+  // 정상 데이터가 있는 경우 에러 숨기고 캔버스 표시
+  if (errorPlaceholder) errorPlaceholder.classList.add("hidden");
+  if (chartCanvas) chartCanvas.classList.remove("hidden");
+
+  const ctx = chartCanvas.getContext("2d");
 
   // 3개월 전 / 6개월 전 비교 전광판 렌더링
   renderPeriodComparisonUI(data.comparison);

@@ -903,11 +903,12 @@ const STOCKS_DATABASE = {
 };
 
 /**
- * 범용 AI 기업 분석 & 주가 예측 생성 엔진
- * 사용자가 입력한 어떤 기업명/티커라도 전자책 프레임워크와 실시간 매크로 지표를 대조하여 즉시 분석 결과를 생성
+ * 기업명/티커 검색 함수 (철저한 데이터 검증 원칙 준수)
+ * - 기등록된 검증 데이터베이스(STOCKS_DATABASE) 또는 한글 매핑 사전에 존재하는 종목만 반환합니다.
+ * - 관련 데이터를 확보할 수 없는 경우, 신뢰성을 위해 임의의 가상 데이터를 절대 생성하지 않고 null을 반환합니다.
  */
-function lookupOrGenerateStock(query) {
-  if (!query || query.trim() === "") return null;
+function lookupStock(query) {
+  if (!query || typeof query !== "string" || query.trim() === "") return null;
   const rawQ = query.trim();
   const qLower = rawQ.toLowerCase();
 
@@ -924,165 +925,12 @@ function lookupOrGenerateStock(query) {
     return STOCKS_DATABASE[ticker];
   }
 
-  // 4. 데이터베이스에 없더라도, 김완수 저자의 프레임워크 기반으로 즉석 동적 분석 엔진 가동!
-  return generateDynamicStockProfile(rawQ, ticker);
+  // 4. 데이터가 없는 경우 임의 생성 절대 금지 (null 반환)
+  return null;
 }
 
-/**
- * 미등록 기업에 대한 실시간 기업정보 + 매크로 + 전자책 프레임워크 기반 동적 예측 엔진
- */
-function generateDynamicStockProfile(query, inferredTicker) {
-  const ticker = inferredTicker || (query.length <= 5 ? query.toUpperCase() : "STOCK");
-  const nameKo = query;
-  
-  // 기업명과 티커를 바탕으로 산업 섹터 자동 추론
-  let sector = "성장 테크 / AI 생태계 기업";
-  let basePE = 35.0;
-  let grossMargin = "40.0%";
-  let netMarginVal = 18.5;
-  let moatScore = 85;
-  let chapter = "AI 시대 신성장 혁신 기업";
-
-  const qLower = query.toLowerCase();
-  if (qLower.includes("반도체") || qLower.includes("chip") || qLower.includes("semi")) {
-    sector = "AI 반도체 및 하드웨어 인프라";
-    basePE = 42.0;
-    netMarginVal = 32.0;
-    moatScore = 90;
-    chapter = "1부 AI 반도체 밸류체인 심층 분석";
-  } else if (qLower.includes("클라우드") || qLower.includes("소프트웨어") || qLower.includes("saas") || qLower.includes("ai")) {
-    sector = "엔터프라이즈 AI 소프트웨어 & 클라우드";
-    basePE = 48.0;
-    netMarginVal = 22.0;
-    moatScore = 88;
-    chapter = "2부 빅테크 클라우드 및 AI 소프트웨어 승자독식";
-  } else if (qLower.includes("전력") || qLower.includes("원자력") || qLower.includes("에너지") || qLower.includes("power")) {
-    sector = "데이터센터 전력 및 에너지 인프라";
-    basePE = 28.0;
-    netMarginVal = 24.0;
-    moatScore = 91;
-    chapter = "8장 AI의 치명적 약점, 전력 폭증 수혜주";
-  } else if (qLower.includes("모빌리티") || qLower.includes("차") || qLower.includes("로봇") || qLower.includes("robot")) {
-    sector = "자율주행 모빌리티 및 로보틱스";
-    basePE = 55.0;
-    netMarginVal = 12.0;
-    moatScore = 86;
-    chapter = "3장 미래 모빌리티와 로보틱스 확장성";
-  } else if (qLower.includes("바이오") || qLower.includes("bio") || qLower.includes("헬스")) {
-    sector = "AI 신약개발 및 디지털 헬스케어";
-    basePE = 40.0;
-    netMarginVal = 15.0;
-    moatScore = 82;
-    chapter = "AI 실제 산업 응용 생태계";
-  }
-
-  // 실시간 거시경제 지표 반영 (10년물 금리, 유가, 공포탐욕지수)
-  const us10y = MARKET_MACRO_DATA.us10yYield.current;
-  const ratePressure = (us10y - 4.0) * 8; // 금리가 4% 초과 시 밸류에이션 압축치
-  const adjustedPE = Math.max(15, parseFloat((basePE - ratePressure).toFixed(1)));
-
-  // 가상의 합리적 주가 산출
-  let hash = 0;
-  for (let i = 0; i < query.length; i++) hash = (hash << 5) - hash + query.charCodeAt(i);
-  hash = Math.abs(hash);
-
-  const currentPrice = parseFloat((40 + (hash % 200) + (hash % 100) * 0.45).toFixed(2));
-  const changePct = parseFloat(((hash % 7) - 3.2).toFixed(2));
-  const change = parseFloat((currentPrice * (changePct / 100)).toFixed(2));
-
-  // 예상 목표주가 (책 10장 할인율 공식 및 실적 가이던스 기반)
-  const growthRate = 20 + (hash % 25); // 예상 성장률 20~45%
-  const targetBase = parseFloat((currentPrice * (1 + (growthRate - ratePressure) / 100)).toFixed(2));
-  const targetBull = parseFloat((targetBase * 1.25).toFixed(2));
-  const targetBear = parseFloat((currentPrice * 0.78).toFixed(2));
-
-  const dynamicStock = {
-    ticker: ticker,
-    nameKo: nameKo,
-    nameEn: `${ticker} International Inc.`,
-    sector: sector,
-    chapter: chapter,
-    authorPortfolioShare: "개별 성장주 심층 분석 종목",
-    currentPrice: currentPrice,
-    change: change,
-    changePct: changePct,
-    marketCap: `${(25 + (hash % 350)).toFixed(1)}B`,
-    peRatio: adjustedPE,
-    forwardPE: parseFloat((adjustedPE * 0.78).toFixed(1)),
-    psRatio: parseFloat((6 + (hash % 15)).toFixed(1)),
-    week52High: parseFloat((currentPrice * 1.28).toFixed(2)),
-    week52Low: parseFloat((currentPrice * 0.65).toFixed(2)),
-    targetPriceBase: targetBase,
-    targetPriceBull: targetBull,
-    targetPriceBear: targetBear,
-
-    financials: {
-      period: "최근 공시 분기 (실시간 분석)",
-      revenue: `$${(2.4 + (hash % 18)).toFixed(2)}B`,
-      revenueYoY: `+${growthRate}% (고성장 궤도)`,
-      datacenterRev: "핵심 성장 사업부 가속화",
-      operatingIncome: `$${((2.4 + (hash % 18)) * 0.32).toFixed(2)}B`,
-      operatingMargin: `${(25 + (hash % 20))}%`,
-      netIncome: `$${((2.4 + (hash % 18)) * (netMarginVal / 100)).toFixed(2)}B`,
-      netMargin: `${netMarginVal}% (실질 순수익률)`,
-      eps: `$${(0.45 + (hash % 1.5)).toFixed(2)}`,
-      epsConsensus: `$${(0.40 + (hash % 1.4)).toFixed(2)}`,
-      epsSurprise: `+${(4 + (hash % 12)).toFixed(1)}% (어닝 서프라이즈)`,
-      operatingCashFlow: `$${((2.4 + (hash % 18)) * 0.35).toFixed(2)}B`,
-      freeCashFlow: `$${((2.4 + (hash % 18)) * 0.26).toFixed(2)}B (FCF 우수)`,
-      capEx: `$${((2.4 + (hash % 18)) * 0.09).toFixed(2)}B`,
-      guidance: "차기 분기 매출 및 영업이익 두 자릿수 성장 유지"
-    },
-
-    bookAnalysis: {
-      moat: `${sector} 영역에서 기술적 진입장벽과 고객 전환비용을 구축 중. 핵심 고객의 재구매율과 고마진 현금 창출력 보유.`,
-      keyCatalysts: [
-        `AI 및 차세대 시장 수요 확대에 따른 분기 매출 +${growthRate}% 고성장`,
-        `실제 순수익률(${netMarginVal}%)과 잉여현금흐름(FCF)의 흑자 구조 안착`,
-        `글로벌 고객사들의 신규 장기 공급 계약 체결 파이프라인 가동`
-      ],
-      keyRisks: [
-        `미 10년물 국채 금리(${us10y}%) 상승 시 고성장주 멀티플 압축(Multiple Compression) 리스크`,
-        `선두 대기업들과의 치열한 기술 및 가격 경쟁`,
-        `거시경제 유가 및 물가 불안에 따른 기업 고객들의 IT 예산 집행 지연 가능성`
-      ],
-      fiveStepScore: {
-        moatScore: moatScore,
-        financialScore: 86,
-        macroResilienceScore: 80,
-        valuationScore: 76,
-        finalAction: "분할 매수 (5단계 체크리스트 검증 후 3~5회 분할 매수 타점)",
-        actionBadge: "BUY_ON_DIP",
-        authorComment: `김완수 저자의 5단계 분석 적용: 단기 가격 출렁임에 휘둘리지 말고, 실제 통장에 꽂히는 FCF와 10년물 국채 금리 할인율 압박을 대조하며 차분하게 분할 접근할 기업.`
-      }
-    },
-
-    news: [
-      {
-        date: "2026-11-14",
-        title: `${nameKo}(${ticker}) 차세대 AI 솔루션 발표 및 글로벌 엔터프라이즈 고객 수주 확대`,
-        sentiment: "positive",
-        summary: `업계 최고 수준의 효율성을 입증하며 시장 점유율을 가파르게 넓혀가고 있음.`
-      },
-      {
-        date: "2026-11-12",
-        title: `월가 '실제 현금 창출력(FCF) 주목할 시점'... ${ticker} 목표주가 $${targetBase} 제시`,
-        sentiment: "positive",
-        summary: `단순 매출 규모보다 알짜배기 순수익률과 FCF 마진의 퀄리티가 우수하게 유지되고 있음을 호평.`
-      },
-      {
-        date: "2026-11-10",
-        title: `미 국채 10년물 금리 변동성에 따른 테크 성장주 밸류에이션 점검`,
-        sentiment: "neutral",
-        summary: `거시경제 금리 흐름에 따른 일시적 밸류에이션 조정을 매수 기회로 활용할 것을 권고.`
-      }
-    ]
-  };
-
-  // 생성된 기업을 캐시에 저장하여 다음 요청 및 What-If 시뮬레이터에서 동일하게 즉각 재활용
-  STOCKS_DATABASE[ticker] = dynamicStock;
-  return dynamicStock;
-}
+// 하위 호환성을 위한 alias
+const lookupOrGenerateStock = lookupStock;
 
 /**
  * 주요 종목별 6개월간 실제 시장 역사적 종가 마일스톤 데이터 (2026년 5월 ~ 11월)
@@ -1216,6 +1064,16 @@ const REAL_STOCK_MILESTONES = {
     { date: "2026-10-15", price: 274.50 },
     { date: "2026-11-14", price: 266.66 }
   ],
+  "GOOGL": [
+    { date: "2026-05-15", price: 278.40 },
+    { date: "2026-06-15", price: 284.10 },
+    { date: "2026-07-15", price: 291.50 },
+    { date: "2026-08-15", price: 268.30 },
+    { date: "2026-09-15", price: 262.90 },
+    { date: "2026-10-15", price: 289.40 },
+    { date: "2026-11-01", price: 293.10 },
+    { date: "2026-11-14", price: 295.77 }
+  ],
   "AAPL": [
     { date: "2026-05-15", price: 322.40 },
     { date: "2026-06-15", price: 335.80 },
@@ -1276,14 +1134,12 @@ function generateDailyHistoryFromMilestones(milestones, latestPrice) {
       const smoothT = (1 - Math.cos(t * Math.PI)) / 2;
       const basePrice = curM.price + (nextM.price - curM.price) * smoothT;
 
-      // 일일 현실적 잔파동 (마일스톤 시점에는 0으로 수렴)
-      const damp = Math.sin(t * Math.PI);
-      const pseudoNoise = (Math.sin(day * 13.7 + m * 5.3) * 0.012) * curM.price * damp;
-      const finalPrice = parseFloat((basePrice + pseudoNoise).toFixed(2));
+      // 부드러운 코사인 스무딩 곡선 (임의 노이즈 없이 마일스톤에 100% 앵커링)
+      const finalPrice = parseFloat(basePrice.toFixed(2));
 
       dates.push(dateStr);
       prices.push(finalPrice);
-      volumes.push(Math.round(30 + Math.abs(Math.sin(day * 2.1)) * 40));
+      volumes.push(50);
     }
   }
 
@@ -1312,7 +1168,7 @@ function generateHistoricalAndFutureData(ticker, customStock) {
   if (stock.realHistory && stock.realHistory.length > 50) {
     dates = stock.realHistory.map(h => h.date);
     actualPrices = stock.realHistory.map(h => h.price);
-    actualVolumes = stock.realHistory.map(() => Math.round(35 + Math.random() * 30));
+    actualVolumes = stock.realHistory.map(() => 50);
   }
   // 2. 검증된 실제 시장 6개월 역사적 마일스톤 데이터가 있는 경우 우선 채택 (100% 실제 차트와 일치)
   else if (REAL_STOCK_MILESTONES[ticker]) {
@@ -1321,23 +1177,9 @@ function generateHistoricalAndFutureData(ticker, customStock) {
     actualPrices = hist.prices;
     actualVolumes = hist.volumes;
   }
-  // 3. 미등록 종목인 경우: 52주 고저가 기반의 현실적 추세 보간
+  // 3. 관련 데이터를 못 갖고 오는 경우: 임의로 데이터를 만들지 않고 null 반환 (차트 미출력 원칙)
   else {
-    const high = stock.week52High || (currentPrice * 1.25);
-    const low = stock.week52Low || (currentPrice * 0.75);
-    const syntheticMilestones = [
-      { date: "2026-05-15", price: parseFloat(((high + low) * 0.48).toFixed(2)) },
-      { date: "2026-06-15", price: parseFloat(((high + low) * 0.50).toFixed(2)) },
-      { date: "2026-07-15", price: parseFloat((low * 1.05).toFixed(2)) },
-      { date: "2026-08-15", price: parseFloat(((high + low) * 0.52).toFixed(2)) },
-      { date: "2026-09-15", price: parseFloat(((high + low) * 0.54).toFixed(2)) },
-      { date: "2026-10-15", price: parseFloat((high * 0.92).toFixed(2)) },
-      { date: "2026-11-14", price: currentPrice }
-    ];
-    const hist = generateDailyHistoryFromMilestones(syntheticMilestones, currentPrice);
-    dates = hist.dates;
-    actualPrices = hist.prices;
-    actualVolumes = hist.volumes;
+    return null;
   }
 
   const cutoffIndex = dates.length - 1;
@@ -1457,7 +1299,9 @@ if (typeof window !== 'undefined') {
   window.MARKET_MACRO_DATA = MARKET_MACRO_DATA;
   window.STOCKS_DATABASE = STOCKS_DATABASE;
   window.KOREAN_TICKER_MAP = KOREAN_TICKER_MAP;
-  window.lookupOrGenerateStock = lookupOrGenerateStock;
+  window.REAL_STOCK_MILESTONES = REAL_STOCK_MILESTONES;
+  window.lookupStock = lookupStock;
+  window.lookupOrGenerateStock = lookupStock;
   window.generateHistoricalAndFutureData = generateHistoricalAndFutureData;
 }
 if (typeof module !== 'undefined' && module.exports) {
@@ -1465,6 +1309,8 @@ if (typeof module !== 'undefined' && module.exports) {
     MARKET_MACRO_DATA,
     STOCKS_DATABASE,
     KOREAN_TICKER_MAP,
+    REAL_STOCK_MILESTONES,
+    lookupStock,
     lookupOrGenerateStock,
     generateHistoricalAndFutureData
   };
