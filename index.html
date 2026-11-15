@@ -367,6 +367,14 @@
                 <span class="text-slate-300">실시간 주가</span>
               </span>
               <span class="flex items-center space-x-1">
+                <span class="w-2 h-2 rounded-full bg-amber-400 border border-white"></span>
+                <span class="text-amber-300 font-semibold">3개월 전</span>
+              </span>
+              <span class="flex items-center space-x-1">
+                <span class="w-2 h-2 rounded-full bg-indigo-400 border border-white"></span>
+                <span class="text-indigo-300 font-semibold">6개월 전</span>
+              </span>
+              <span class="flex items-center space-x-1">
                 <span class="w-3 h-0.5 border-t-2 border-dashed border-amber-400"></span>
                 <span class="text-amber-300">Base 예상</span>
               </span>
@@ -379,6 +387,60 @@
                 <span class="text-rose-300">Bear 보수</span>
               </span>
             </div>
+          </div>
+
+          <!-- 현시점 대비 3개월 전 / 6개월 전 주가 등락률 비교 전광판 바 -->
+          <div id="chart-period-comparison-bar" class="mt-3.5 p-3 rounded-xl bg-slate-950/80 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            
+            <!-- 3개월 전 비교 카드 -->
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/90 border border-amber-500/40 shadow-inner">
+              <div class="space-y-0.5">
+                <div class="flex items-center space-x-1.5 text-xs text-amber-300 font-bold">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span>3개월 전 시점 대비</span>
+                  <span id="cmp-3m-date" class="text-[10px] text-slate-400 font-normal font-mono">(--)</span>
+                </div>
+                <div class="text-[11px] text-slate-400">
+                  <span id="cmp-3m-price" class="font-mono text-slate-300">$--</span> → 
+                  <span class="font-mono text-white font-semibold">현재</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div id="cmp-3m-pct" class="text-base sm:text-lg font-black text-emerald-400 font-mono tracking-tight">--</div>
+                <div id="cmp-3m-diff" class="text-[10px] font-semibold text-emerald-400/80 font-mono">--</div>
+              </div>
+            </div>
+
+            <!-- 6개월 전 비교 카드 -->
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/90 border border-indigo-500/40 shadow-inner">
+              <div class="space-y-0.5">
+                <div class="flex items-center space-x-1.5 text-xs text-indigo-300 font-bold">
+                  <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                  <span>6개월 전 시점 대비</span>
+                  <span id="cmp-6m-date" class="text-[10px] text-slate-400 font-normal font-mono">(--)</span>
+                </div>
+                <div class="text-[11px] text-slate-400">
+                  <span id="cmp-6m-price" class="font-mono text-slate-300">$--</span> → 
+                  <span class="font-mono text-white font-semibold">현재</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div id="cmp-6m-pct" class="text-base sm:text-lg font-black text-emerald-400 font-mono tracking-tight">--</div>
+                <div id="cmp-6m-diff" class="text-[10px] font-semibold text-emerald-400/80 font-mono">--</div>
+              </div>
+            </div>
+
+            <!-- 기간 모멘텀 분석 코멘트 카드 -->
+            <div class="sm:col-span-2 lg:col-span-1 flex flex-col justify-center p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div class="text-[11px] text-slate-400 font-medium flex items-center space-x-1">
+                <i class="fas fa-tachometer-alt text-sky-400 text-[10px]"></i>
+                <span class="text-slate-200 font-semibold">중단기 수익률 진단</span>
+              </div>
+              <div id="cmp-trend-summary" class="text-xs text-sky-300 font-medium mt-1 leading-snug">
+                데이터 분석 중...
+              </div>
+            </div>
+
           </div>
 
           <!-- 차트 영역 -->

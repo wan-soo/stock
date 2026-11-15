@@ -523,8 +523,8 @@ async function fetchRealtimeStockQuote(ticker) {
   if (!ticker) return null;
   const cleanTicker = ticker.toUpperCase().trim();
   
-  // Yahoo Finance v8 chart API (최근 3개월 일봉 데이터)
-  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${cleanTicker}?interval=1d&range=3mo`;
+  // Yahoo Finance v8 chart API (최근 1년 일봉 데이터 - 3개월 및 6개월 전 주가 비교용)
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${cleanTicker}?interval=1d&range=1y`;
   
   const proxies = [
     `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
@@ -812,12 +812,81 @@ function renderFinancialCards(stock) {
 }
 
 /**
+ * 3개월 전 및 6개월 전 시점 대비 주가 등락률 UI 전광판 렌더링
+ */
+function renderPeriodComparisonUI(comparison) {
+  if (!comparison) return;
+
+  const p3 = comparison.threeMonths;
+  const p6 = comparison.sixMonths;
+
+  // 1. 3개월 전 대비 카드
+  const elDate3 = document.getElementById("cmp-3m-date");
+  const elPrice3 = document.getElementById("cmp-3m-price");
+  const elPct3 = document.getElementById("cmp-3m-pct");
+  const elDiff3 = document.getElementById("cmp-3m-diff");
+
+  if (elDate3) elDate3.innerText = `(${p3.date})`;
+  if (elPrice3) elPrice3.innerText = `$${p3.price.toFixed(2)}`;
+  if (elPct3) {
+    const isUp3 = p3.changePct >= 0;
+    elPct3.className = `text-base sm:text-lg font-black font-mono tracking-tight ${isUp3 ? 'text-emerald-400' : 'text-rose-400'}`;
+    elPct3.innerText = `${isUp3 ? '▲ +' : '▼ '}${p3.changePct.toFixed(1)}%`;
+  }
+  if (elDiff3) {
+    const isUp3 = p3.change >= 0;
+    elDiff3.className = `text-[10px] font-semibold font-mono ${isUp3 ? 'text-emerald-400/80' : 'text-rose-400/80'}`;
+    elDiff3.innerText = `${isUp3 ? '+' : ''}$${p3.change.toFixed(2)}`;
+  }
+
+  // 2. 6개월 전 대비 카드
+  const elDate6 = document.getElementById("cmp-6m-date");
+  const elPrice6 = document.getElementById("cmp-6m-price");
+  const elPct6 = document.getElementById("cmp-6m-pct");
+  const elDiff6 = document.getElementById("cmp-6m-diff");
+
+  if (elDate6) elDate6.innerText = `(${p6.date})`;
+  if (elPrice6) elPrice6.innerText = `$${p6.price.toFixed(2)}`;
+  if (elPct6) {
+    const isUp6 = p6.changePct >= 0;
+    elPct6.className = `text-base sm:text-lg font-black font-mono tracking-tight ${isUp6 ? 'text-emerald-400' : 'text-rose-400'}`;
+    elPct6.innerText = `${isUp6 ? '▲ +' : '▼ '}${p6.changePct.toFixed(1)}%`;
+  }
+  if (elDiff6) {
+    const isUp6 = p6.change >= 0;
+    elDiff6.className = `text-[10px] font-semibold font-mono ${isUp6 ? 'text-emerald-400/80' : 'text-rose-400/80'}`;
+    elDiff6.innerText = `${isUp6 ? '+' : ''}$${p6.change.toFixed(2)}`;
+  }
+
+  // 3. 중단기 수익률 추세 진단 코멘트
+  const elSummary = document.getElementById("cmp-trend-summary");
+  if (elSummary) {
+    if (p3.changePct > 0 && p6.changePct > 0) {
+      if (p3.changePct >= (p6.changePct / 2)) {
+        elSummary.innerHTML = `<span class="text-emerald-300">🚀 3M(+${p3.changePct}%) · 6M(+${p6.changePct}%): 최근 3개월간 상승 탄력 가속화 중!</span>`;
+      } else {
+        elSummary.innerHTML = `<span class="text-sky-300">📈 3M(+${p3.changePct}%) · 6M(+${p6.changePct}%): 6개월 중장기 견고한 우상향 추세 유지</span>`;
+      }
+    } else if (p3.changePct < 0 && p6.changePct > 0) {
+      elSummary.innerHTML = `<span class="text-amber-300">⚠️ 6M(+${p6.changePct}%) 중기 상승세 속 최근 3M(${p3.changePct}%) 단기 숨고르기/눌림목</span>`;
+    } else if (p3.changePct > 0 && p6.changePct < 0) {
+      elSummary.innerHTML = `<span class="text-emerald-300">🔄 6M(${p6.changePct}%) 부진 딛고 최근 3M(+${p3.changePct}%) 강력한 반등 전환 성공</span>`;
+    } else {
+      elSummary.innerHTML = `<span class="text-rose-300">📉 3M(${p3.changePct}%) · 6M(${p6.changePct}%): 중단기 조정 지속, 공포지수 20 이하 분할 매수 타점 탐색</span>`;
+    }
+  }
+}
+
+/**
  * 실시간 주가 차트 vs 향후 예상 주가 차트 (다른 색상으로 명확히 구분 렌더링)
  */
 function renderStockPredictionChart(stock) {
   const ctx = document.getElementById("stock-prediction-chart").getContext("2d");
   const data = generateHistoricalAndFutureData(stock.ticker, stock);
   if (!data) return;
+
+  // 3개월 전 / 6개월 전 비교 전광판 렌더링
+  renderPeriodComparisonUI(data.comparison);
 
   // What-If 시뮬레이터 파라미터 적용 (금리 변동 & 유가 변동 & 성장률 조정치)
   const rateDelta = simParams.us10y - MARKET_MACRO_DATA.us10yYield.current;
@@ -852,11 +921,25 @@ function renderStockPredictionChart(stock) {
           tension: 0.15,
           pointRadius: (ctx) => {
             const index = ctx.dataIndex;
-            return index === cutoff ? 6 : 0; // 오늘 시점에 강조 포인트
+            if (index === cutoff) return 7; // 오늘/현시점 강조 포인트
+            if (data.comparison) {
+              if (index === data.comparison.threeMonths.index) return 6; // 3개월 전 포인트
+              if (index === data.comparison.sixMonths.index) return 6; // 6개월 전 포인트
+            }
+            return 0;
           },
-          pointBackgroundColor: "#38bdf8",
+          pointBackgroundColor: (ctx) => {
+            const index = ctx.dataIndex;
+            if (index === cutoff) return "#38bdf8"; // 스카이블루 (오늘)
+            if (data.comparison) {
+              if (index === data.comparison.threeMonths.index) return "#f59e0b"; // 앰버/황금 (3개월 전)
+              if (index === data.comparison.sixMonths.index) return "#818cf8"; // 인디고/보라 (6개월 전)
+            }
+            return "#0ea5e9";
+          },
           pointBorderColor: "#ffffff",
           pointBorderWidth: 2,
+          pointHoverRadius: 8,
           order: 1
         },
         {
@@ -927,8 +1010,13 @@ function renderStockPredictionChart(stock) {
           callbacks: {
             title: (items) => {
               const d = items[0].label;
-              if (d === todayDate) return `${d} [오늘 기준일 - 현재 실시간가]`;
-              return d > todayDate ? `${d} [AI 미래 예측 시점]` : `${d} [실제 거래일]`;
+              const idx = items[0].dataIndex;
+              if (idx === cutoff) return `📍 [오늘/현시점 실시간] ${d}`;
+              if (data.comparison) {
+                if (idx === data.comparison.threeMonths.index) return `📅 [3개월 전 시점] ${d}`;
+                if (idx === data.comparison.sixMonths.index) return `📅 [6개월 전 시점] ${d}`;
+              }
+              return d > todayDate ? `🔮 [AI 미래 예측] ${d}` : `과거 거래일: ${d}`;
             },
             label: (item) => {
               if (item.raw === null || item.raw === undefined) return null;
@@ -936,6 +1024,34 @@ function renderStockPredictionChart(stock) {
             },
             afterBody: (items) => {
               const item = items[0];
+              const idx = item.dataIndex;
+              if (data.comparison) {
+                if (idx === data.comparison.threeMonths.index) {
+                  const p = data.comparison.threeMonths;
+                  return [
+                    "",
+                    `• 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
+                    `• 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
+                  ];
+                }
+                if (idx === data.comparison.sixMonths.index) {
+                  const p = data.comparison.sixMonths;
+                  return [
+                    "",
+                    `• 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
+                    `• 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
+                  ];
+                }
+                if (idx === cutoff) {
+                  const p3 = data.comparison.threeMonths;
+                  const p6 = data.comparison.sixMonths;
+                  return [
+                    "",
+                    `• 3개월 전 대비: ${p3.changePct >= 0 ? '+' : ''}${p3.changePct.toFixed(1)}% (${p3.change >= 0 ? '+' : ''}$${p3.change.toFixed(2)})`,
+                    `• 6개월 전 대비: ${p6.changePct >= 0 ? '+' : ''}${p6.changePct.toFixed(1)}% (${p6.change >= 0 ? '+' : ''}$${p6.change.toFixed(2)})`
+                  ];
+                }
+              }
               if (item.label > todayDate) {
                 return [
                   "",

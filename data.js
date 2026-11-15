@@ -1102,14 +1102,17 @@ function generateHistoricalAndFutureData(ticker, customStock) {
     actualPrices = stock.realHistory.map(h => h.price);
     actualVolumes = stock.realHistory.map(() => Math.round(35 + Math.random() * 30));
   } else {
-    // 2. 검증된 시뮬레이션 일봉 생성
+    // 2. 검증된 시뮬레이션 일봉 생성 (6개월 전 ~ 오늘까지 약 130영업일)
     const baseDate = new Date("2026-11-14");
-    const historyDays = 90;
-    let p = currentPrice * 0.82;
-    if (ticker === 'AAPL') p = currentPrice * 0.95;
-    if (ticker === 'PLTR') p = currentPrice * 0.65;
-    if (ticker === 'TSLA') p = currentPrice * 0.75;
-    if (ticker === 'VST') p = currentPrice * 0.70;
+    const historyDays = 130;
+    let p = currentPrice * 0.72;
+    if (ticker === 'AAPL') p = currentPrice * 0.88;
+    if (ticker === 'NVDA') p = currentPrice * 0.68;
+    if (ticker === 'PLTR') p = currentPrice * 0.42;
+    if (ticker === 'TSLA') p = currentPrice * 0.58;
+    if (ticker === 'META') p = currentPrice * 0.74;
+    if (ticker === 'VST') p = currentPrice * 0.58;
+    if (ticker === 'SPCX') p = currentPrice * 0.70;
 
     for (let i = historyDays; i >= 0; i--) {
       const d = new Date(baseDate);
@@ -1131,6 +1134,64 @@ function generateHistoricalAndFutureData(ticker, customStock) {
   }
 
   const cutoffIndex = dates.length - 1;
+  const todayDateStr = dates[cutoffIndex];
+  const todayDate = new Date(todayDateStr);
+  const todayPrice = actualPrices[cutoffIndex];
+
+  // 3개월 전 (약 90일 전) 매칭
+  const target3MTime = todayDate.getTime() - (90 * 24 * 60 * 60 * 1000);
+  let idx3M = 0;
+  let minDiff3M = Infinity;
+
+  // 6개월 전 (약 180일 전) 매칭
+  const target6MTime = todayDate.getTime() - (180 * 24 * 60 * 60 * 1000);
+  let idx6M = 0;
+  let minDiff6M = Infinity;
+
+  for (let i = 0; i <= cutoffIndex; i++) {
+    const t = new Date(dates[i]).getTime();
+    const diff3M = Math.abs(t - target3MTime);
+    if (diff3M < minDiff3M) {
+      minDiff3M = diff3M;
+      idx3M = i;
+    }
+    const diff6M = Math.abs(t - target6MTime);
+    if (diff6M < minDiff6M) {
+      minDiff6M = diff6M;
+      idx6M = i;
+    }
+  }
+
+  // 3개월 전 및 6개월 전 시점 주가 & 등락폭(%) 계산
+  const price3M = actualPrices[idx3M];
+  const change3M = todayPrice - price3M;
+  const changePct3M = price3M > 0 ? ((change3M / price3M) * 100) : 0;
+
+  const price6M = actualPrices[idx6M];
+  const change6M = todayPrice - price6M;
+  const changePct6M = price6M > 0 ? ((change6M / price6M) * 100) : 0;
+
+  const comparison = {
+    today: {
+      index: cutoffIndex,
+      date: todayDateStr,
+      price: todayPrice
+    },
+    threeMonths: {
+      index: idx3M,
+      date: dates[idx3M],
+      price: parseFloat(price3M.toFixed(2)),
+      change: parseFloat(change3M.toFixed(2)),
+      changePct: parseFloat(changePct3M.toFixed(2))
+    },
+    sixMonths: {
+      index: idx6M,
+      date: dates[idx6M],
+      price: parseFloat(price6M.toFixed(2)),
+      change: parseFloat(change6M.toFixed(2)),
+      changePct: parseFloat(changePct6M.toFixed(2))
+    }
+  };
 
   // 미래 예상치 (향후 60구간 = 약 6개월~1년 예상 궤적)
   const predictedBase = new Array(cutoffIndex).fill(null);
@@ -1179,7 +1240,8 @@ function generateHistoricalAndFutureData(ticker, customStock) {
     predictedBase,
     predictedBull,
     predictedBear,
-    cutoffIndex
+    cutoffIndex,
+    comparison
   };
 }
 
