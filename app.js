@@ -149,8 +149,10 @@ async function refreshLiveMarketData() {
       chgEl.innerText = `${isUp ? '▲' : '▼'} ${Math.abs(results.tnx.changePct).toFixed(2)}%`;
     }
     if (dot) dot.className = "fas fa-circle text-[6px] text-emerald-400 animate-pulse";
-    MARKET_MACRO_DATA.us10yYield.current = yieldVal;
+    MARKET_MACRO_DATA.us10yYield.current = parseFloat(yieldVal.toFixed(2));
+    MARKET_MACRO_DATA.us10yYield.change = results.tnx.change;
     successCount++;
+    initMacroHeader(); // 상단 헤더의 10년물 금리도 동기화
   }
 
   // 4. S&P 500

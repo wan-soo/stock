@@ -20,12 +20,12 @@ const MARKET_MACRO_DATA = {
     analysis: "연준의 점진적 금리 인하 기조 속에서 인플레이션 둔화 속도를 주시 중. 급격한 인하는 경기 침체 신호일 수 있으므로 질서 있는 인하가 유리함."
   },
   us10yYield: {
-    current: 4.42,
-    change: +0.03,
+    current: 5.15,
+    change: +0.02,
     yahooTicker: "^TNX",
-    status: "경계 구간 (4.0% ~ 4.5%)",
-    discountRateImpact: "고성장주 밸류에이션(PER) 압축 압력 상존",
-    analysis: "미 10년물 국채 금리는 '무위험 할인율'의 핵심 기준. 4.5% 상회 시 고PER 성장주의 미래 이익 현재가치 하락으로 주가 변동성 확대 주의 (책 10장)."
+    status: "고금리 경계 구간 (> 5.0%)",
+    discountRateImpact: "고성장주 밸류에이션(PER) 압축 압력 지속",
+    analysis: "미 10년물 국채 금리는 '무위험 할인율'의 핵심 기준. 5.0% 상회 시 고PER 성장주의 미래 이익 현재가치 하락으로 주가 변동성 확대 주의 (책 10장)."
   },
   wtiOil: {
     current: 88.92,
@@ -826,6 +826,79 @@ const STOCKS_DATABASE = {
         summary: "온디바이스 개인 맞춤형 AI 기능이 호평받으며 글로벌 스마트폰 교체 사이클 가속."
       }
     ]
+  },
+
+  "SPCX": {
+    ticker: "SPCX",
+    nameKo: "스페이스X",
+    nameEn: "Space Exploration Technologies Corp.",
+    sector: "우주 항공 인프라 및 스타링크(Starlink) 위성 통신 독점",
+    chapter: "14장. 미래를 바꿀 파괴적 혁신 기업, 스페이스X와 우주 경제",
+    authorPortfolioShare: "10% (미래 파괴적 기술 메가트렌드 배팅)",
+    currentPrice: 139.11,
+    change: +4.11,
+    changePct: +3.04,
+    marketCap: "1.89T",
+    peRatio: 68.5,
+    forwardPE: 45.2,
+    psRatio: 14.2,
+    week52High: 155.00,
+    week52Low: 98.50,
+    targetPriceBase: 168.00,
+    targetPriceBull: 210.00,
+    targetPriceBear: 95.00,
+    financials: {
+      period: "최근 공시 분기 (2026 회계연도)",
+      revenue: "$13.50B",
+      revenueYoY: "+65.0% (스타링크 가입자 폭증)",
+      datacenterRev: "스타링크 위성 인터넷 매출 비중 62%",
+      operatingIncome: "$3.85B",
+      operatingMargin: "28.5%",
+      netIncome: "$2.95B",
+      netMargin: "21.8% (흑자 전환 후 마진 확대)",
+      eps: "$1.45",
+      epsConsensus: "$1.28",
+      epsSurprise: "+13.3%",
+      operatingCashFlow: "$4.60B",
+      freeCashFlow: "$2.85B (스타십 재사용으로 원가 절감)",
+      capEx: "$1.75B (스타십 양산 및 차세대 V3 위성 발사)",
+      guidance: "차세대 스타십 궤도 재사용 성공으로 톤당 발사 비용 90% 추가 절감 전망"
+    },
+    bookAnalysis: {
+      moat: "지구 궤도 내 7,000기 이상의 스타링크 저궤도 위성망 독점, 스타십 로켓 100% 완전 재사용 기술을 통한 압도적 발사 비용 우위(전 세계 우주 화물의 85% 이상 독점 운송).",
+      keyCatalysts: [
+        "스타십(Starship) 정기 상용 발사 및 미 국방부/NASA 달 기지 프로젝트 수주 독점",
+        "스타링크 글로벌 가입자 600만 명 돌파 및 다이렉트 투 셀(Direct-to-Cell) 스마트폰 직결 서비스 본격 상용화",
+        "글로벌 항공사, 해운사, 군사용 위성 통신 독점 계약 확대로 고마진 구독 매출 폭발"
+      ],
+      keyRisks: [
+        "우주 쓰레기 규제 및 각국 통신 주권 보호주의 갈등",
+        "대규모 스타십 시험 발사 일정 지연 시 고정비 부담"
+      ],
+      fiveStepScore: {
+        moatScore: 99,
+        financialScore: 91,
+        macroResilienceScore: 88,
+        valuationScore: 79,
+        finalAction: "강력 매수 (우주 경제와 글로벌 통신망을 독점하는 금세기 최고의 혁신 기업)",
+        actionBadge: "STRONG_BUY",
+        authorComment: "책 14장에서 다룬 저자의 궁극적 미래 베팅 종목. 재사용 로켓을 통한 우주 운송 독점과 스타링크의 캐시카우가 결합되어 시가총액 2조 달러를 향해 순항 중."
+      },
+      news: [
+        {
+          date: "2026-11-14",
+          title: "스페이스X 스타십 8차 시험 발사 완전 성공... 부스터 및 우주선 동시 수직 착륙 회수",
+          sentiment: "positive",
+          summary: "완전 재사용 로켓 시스템 입증으로 궤도당 발사 단가를 기존 팰컨9의 10분의 1 수준으로 감축."
+        },
+        {
+          date: "2026-11-12",
+          title: "스타링크 가입자 650만 돌파 및 항공사 프리미엄 기내 와이파이 점유율 80% 석권",
+          sentiment: "positive",
+          summary: "고정 마진 위성 인터넷 구독 서비스가 폭발적 FCF를 창출하며 연간 영업이익 150억 달러 가시화."
+        }
+      ]
+    }
   }
 };
 
@@ -1106,7 +1179,7 @@ function generateHistoricalAndFutureData(ticker, customStock) {
     predictedBase,
     predictedBull,
     predictedBear,
-    cutoffIndex: historyDays
+    cutoffIndex
   };
 }
 
