@@ -691,14 +691,14 @@
         <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
           <div class="flex justify-between items-center text-xs">
             <span class="text-slate-300 font-medium">美 10년물 국채 금리 (할인율)</span>
-            <span id="sim-val-rate" class="font-bold text-amber-300">4.42%</span>
+            <span id="sim-val-rate" class="font-bold text-amber-300">5.12%</span>
           </div>
-          <input type="range" id="sim-slider-rate" min="3.00" max="5.50" step="0.05" value="4.42" 
+          <input type="range" id="sim-slider-rate" min="3.00" max="6.00" step="0.05" value="5.12" 
                  class="w-full accent-sky-500 cursor-pointer">
           <div class="flex justify-between text-[10px] text-slate-500">
             <span>3.0% (초호황/저금리)</span>
-            <span>4.42% (현재)</span>
-            <span>5.5% (금리 발작)</span>
+            <span id="sim-label-current-rate">5.12% (현재)</span>
+            <span>6.0% (금리 발작)</span>
           </div>
           <p class="text-[11px] text-slate-400">금리 상승 시 미래 이익의 현재 가치가 깎여 고PER 성장주 주가 하락 압력 발생 (책 10장)</p>
         </div>
@@ -707,14 +707,14 @@
         <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
           <div class="flex justify-between items-center text-xs">
             <span class="text-slate-300 font-medium">국제 유가 (WTI, $/배럴)</span>
-            <span id="sim-val-oil" class="font-bold text-slate-200">$71</span>
+            <span id="sim-val-oil" class="font-bold text-slate-200">$85</span>
           </div>
-          <input type="range" id="sim-slider-oil" min="50" max="110" step="1" value="71" 
+          <input type="range" id="sim-slider-oil" min="50" max="130" step="1" value="85" 
                  class="w-full accent-amber-500 cursor-pointer">
           <div class="flex justify-between text-[10px] text-slate-500">
             <span>$50 (안정)</span>
-            <span>$71 (현재)</span>
-            <span>$110 (오일쇼크)</span>
+            <span id="sim-label-current-oil">$85 (현재)</span>
+            <span>$130 (오일쇼크)</span>
           </div>
           <p class="text-[11px] text-slate-400">유가 급등 시 데이터센터 전력비 증가 & 인플레이션 자극으로 연준 긴축 연장 (책 11장)</p>
         </div>

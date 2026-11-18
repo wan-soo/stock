@@ -20,21 +20,21 @@ const MARKET_MACRO_DATA = {
     analysis: "연준의 점진적 금리 인하 기조 속에서 인플레이션 둔화 속도를 주시 중. 급격한 인하는 경기 침체 신호일 수 있으므로 질서 있는 인하가 유리함."
   },
   us10yYield: {
-    current: 5.15,
-    change: +0.02,
+    current: 5.12,
+    change: -0.03,
     yahooTicker: "^TNX",
     status: "고금리 경계 구간 (> 5.0%)",
     discountRateImpact: "고성장주 밸류에이션(PER) 압축 압력 지속",
     analysis: "미 10년물 국채 금리는 '무위험 할인율'의 핵심 기준. 5.0% 상회 시 고PER 성장주의 미래 이익 현재가치 하락으로 주가 변동성 확대 주의 (책 10장)."
   },
   wtiOil: {
-    current: 88.92,
-    change: +0.55,
-    changePct: +0.62,
+    current: 85.34,
+    change: -0.38,
+    changePct: -0.44,
     yahooTicker: "CL=F",
-    status: "상승 국면 ($85~$90)",
-    inflationPressure: "중간",
-    analysis: "유가 상승 시 2차 인플레이션 재발 위험 점검 필요. 빅테크 데이터센터 전력 비용 및 물류비용 부담 요인 (책 11장)."
+    status: "조정 국면 ($84~$86)",
+    inflationPressure: "중간 완화",
+    analysis: "국제 유가(WTI)는 글로벌 공급 과잉 전망 및 중동 리스크 일부 완화로 배럴당 $85선에서 형성. 유가 급등 시 2차 인플레이션 및 데이터센터 전력비 부담 점검 필요 (책 11장)."
   },
   fearGreedIndex: {
     score: 41,

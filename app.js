@@ -1581,6 +1581,29 @@ function initWhatIfSimulator() {
     }
   };
 
+  // 슬라이더 초기 기준값을 실시간 거시경제 데이터로 동기화
+  const syncSliderDefaults = () => {
+    if (MARKET_MACRO_DATA && MARKET_MACRO_DATA.us10yYield && MARKET_MACRO_DATA.wtiOil) {
+      sliderRate.value = MARKET_MACRO_DATA.us10yYield.current;
+      sliderOil.value = Math.round(MARKET_MACRO_DATA.wtiOil.current);
+      sliderGrowth.value = 0;
+      simParams.us10y = MARKET_MACRO_DATA.us10yYield.current;
+      simParams.oil = MARKET_MACRO_DATA.wtiOil.current;
+      simParams.growthBoost = 0;
+
+      valRate.innerText = `${simParams.us10y.toFixed(2)}%`;
+      valOil.innerText = `$${simParams.oil.toFixed(0)}`;
+      valGrowth.innerText = `0%`;
+
+      const lblRate = document.getElementById("sim-label-current-rate");
+      if (lblRate) lblRate.innerText = `${MARKET_MACRO_DATA.us10yYield.current}% (현재)`;
+      const lblOil = document.getElementById("sim-label-current-oil");
+      if (lblOil) lblOil.innerText = `$${Math.round(MARKET_MACRO_DATA.wtiOil.current)} (현재)`;
+    }
+  };
+
+  syncSliderDefaults();
+
   sliderRate.addEventListener("input", updateSim);
   sliderOil.addEventListener("input", updateSim);
   sliderGrowth.addEventListener("input", updateSim);
@@ -1589,10 +1612,11 @@ function initWhatIfSimulator() {
   const resetBtn = document.getElementById("sim-reset-btn");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
-      sliderRate.value = MARKET_MACRO_DATA.us10yYield.current;
-      sliderOil.value = MARKET_MACRO_DATA.wtiOil.current;
-      sliderGrowth.value = 0;
-      updateSim();
+      syncSliderDefaults();
+      const stock = STOCKS_DATABASE[currentTicker] || lookupOrGenerateStock(currentTicker);
+      if (stock) {
+        renderStockPredictionChart(stock);
+      }
     });
   }
 }
