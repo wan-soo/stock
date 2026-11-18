@@ -1,0 +1,44 @@
+name: Auto Update Stock Data & Financials
+
+on:
+  # 1. 정기 실행: 매주 월요일~금요일 미국 증시 마감 후 (한국시간 오전 7시 / UTC 22:00)
+  schedule:
+    - cron: '0 22 * * 1-5'
+  # 2. 관리자가 GitHub Actions 탭에서 버튼을 눌러 언제든지 즉시 수동 실행 가능
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-stock-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests yfinance
+
+      - name: Run Financials & Stock Data Updater
+        run: |
+          python scripts/update_financials.py
+
+      - name: Commit and Push Changes If Updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.js
+          if git diff --staged --quiet; then
+            echo "No financial changes detected. Data is already up-to-date."
+          else
+            git commit -m "chore(auto): GitHub Actions 자동 기업 실적 및 주가 데이터 갱신 [skip ci]"
+            git push origin main
+          fi
