@@ -37,15 +37,16 @@ document.addEventListener("DOMContentLoaded", () => {
 // Yahoo Finance v8 chart API를 CORS 프록시를 통해 호출
 async function fetchYahooQuote(symbol) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
+  // 야후 파이낸스 환율 및 지표 호출에 가장 성공률이 높은 프록시 순서
   const proxies = [
-    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
   ];
   for (const proxyUrl of proxies) {
     try {
       const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 3500);
+      const tid = setTimeout(() => ctrl.abort(), 4000);
       const res = await fetch(proxyUrl, { signal: ctrl.signal });
       clearTimeout(tid);
       if (!res.ok) continue;
@@ -66,29 +67,8 @@ async function fetchYahooQuote(symbol) {
     } catch (e) { /* try next proxy */ }
   }
 
-  // 환율의 경우 공식 환율 API(exchangerate-api.com)를 다이렉트 백업으로 호출
-  if (symbol === "KRW=X") {
-    try {
-      const resEx = await fetch("https://api.exchangerate-api.com/v4/latest/USD", { signal: AbortSignal.timeout(3000) });
-      if (resEx.ok) {
-        const jEx = await resEx.json();
-        if (jEx && jEx.rates && jEx.rates.KRW) {
-          const liveKrw = parseFloat(jEx.rates.KRW.toFixed(2));
-          const prevKrw = MARKET_MACRO_DATA.exchangeRate.usdKrw || 1332.40;
-          const chg = liveKrw - prevKrw;
-          const chgPct = (chg / prevKrw) * 100;
-          return {
-            symbol: "KRW=X",
-            price: liveKrw,
-            change: parseFloat(chg.toFixed(2)),
-            changePct: parseFloat(chgPct.toFixed(2)),
-            currency: "KRW"
-          };
-        }
-      }
-    } catch (e) { /* fallback */ }
-  }
-
+  // ※ 중요 원칙: 환율(KRW=X) 조회가 지연되더라도 기준이 다른 무료 환율 API(1331원 등)로 덮어쓰지 않고,
+  // 검증된 공식 외환 시장 DB(1346.13원)를 신뢰성 있게 유지합니다.
   return null;
 }
 
