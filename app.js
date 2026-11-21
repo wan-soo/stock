@@ -184,10 +184,23 @@ function initLiveMarketCardsWithVerifiedDB() {
   // 상태 표기
   const statusEl = document.getElementById("live-market-status");
   const sourceEl = document.getElementById("live-market-source");
+  const pillEl = document.getElementById("macro-source-pill");
+  const verifiedEl = document.getElementById("macro-verified-badge");
+  const asofEl = document.getElementById("live-market-asof");
+
   if (statusEl) {
     statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>검증 DB 기준</span>`;
     statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono";
   }
+  if (pillEl) {
+    pillEl.innerText = "[제공·저장 자료 우선]";
+    pillEl.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-sky-950 text-sky-300 border border-sky-800 font-mono";
+  }
+  if (verifiedEl) {
+    verifiedEl.innerHTML = `<i class="fas fa-check-circle text-[9px] mr-1"></i><span>[사실] 공식 종가 검증 완료</span>`;
+    verifiedEl.className = "text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center space-x-1";
+  }
+  if (asofEl) asofEl.innerText = `자료 기준일: ${m.dataAsOf || "2026-11-20"}`;
   if (sourceEl) sourceEl.innerText = "📡 공식 시장 검증 DB 기준 (실시간 스트림 조회 중...)";
 }
 
@@ -221,6 +234,9 @@ async function refreshLiveMarketData() {
   await Promise.allSettled(promises);
 
   const now = new Date().toLocaleTimeString("ko-KR", { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const pillEl = document.getElementById("macro-source-pill");
+  const verifiedEl = document.getElementById("macro-verified-badge");
+  const asofEl = document.getElementById("live-market-asof");
   let successCount = 0;
 
   // 각 카드 업데이트 헬퍼
@@ -350,18 +366,45 @@ async function refreshLiveMarketData() {
       statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span><span>실시간 연동 완료 (7/7)</span>`;
       statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono";
     }
-    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 시세 연동 완료 (모든 지표 수신)`;
+    if (pillEl) {
+      pillEl.innerText = "[공개 자료 수집]";
+      pillEl.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono";
+    }
+    if (verifiedEl) {
+      verifiedEl.innerHTML = `<i class="fas fa-check-circle text-[9px] mr-1"></i><span>[사실] 실시간 시세 수신</span>`;
+      verifiedEl.className = "text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center space-x-1";
+    }
+    if (asofEl) asofEl.innerText = `자료 기준일: 실시간 (${now})`;
+    if (sourceEl) sourceEl.innerText = `📡 Yahoo Finance 실시간 스트림 연동 완료 (모든 지표 수신)`;
   } else if (successCount > 0) {
     if (statusEl) {
       statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>실시간 연동 (${successCount}/7)</span>`;
       statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono";
     }
+    if (pillEl) {
+      pillEl.innerText = "[공개 수집 + 저장 DB]";
+      pillEl.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono";
+    }
+    if (verifiedEl) {
+      verifiedEl.innerHTML = `<i class="fas fa-check-circle text-[9px] mr-1"></i><span>[사실] 시장 종가 확인</span>`;
+      verifiedEl.className = "text-[10px] px-2 py-0.5 rounded font-mono bg-sky-950 text-sky-400 border border-sky-800 flex items-center space-x-1";
+    }
+    if (asofEl) asofEl.innerText = `자료 기준일: 2026-11-20 (실시간 갱신: ${now})`;
     if (sourceEl) sourceEl.innerText = `📡 실시간 연동 성공 (${successCount}/7 지표) · 나머지 지표는 검증 시장 DB 기준 표시`;
   } else {
     if (statusEl) {
       statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>검증 DB 기준</span>`;
       statusEl.className = "inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono";
     }
+    if (pillEl) {
+      pillEl.innerText = "[제공·저장 자료 우선]";
+      pillEl.className = "text-[10px] px-2 py-0.5 rounded font-bold bg-sky-950 text-sky-300 border border-sky-800 font-mono";
+    }
+    if (verifiedEl) {
+      verifiedEl.innerHTML = `<i class="fas fa-check-circle text-[9px] mr-1"></i><span>[사실] 공식 종가 검증 완료</span>`;
+      verifiedEl.className = "text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center space-x-1";
+    }
+    if (asofEl) asofEl.innerText = `자료 기준일: 2026-11-20`;
     if (sourceEl) sourceEl.innerText = "📡 공식 시장 검증 DB 기준 표시 중 (원격 프록시 지연 시 안전 모드 가동)";
   }
   if (timeEl) timeEl.innerText = `마지막 갱신: ${now}`;

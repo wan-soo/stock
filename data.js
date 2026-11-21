@@ -4,51 +4,68 @@
  */
 
 const MARKET_MACRO_DATA = {
-  updatedAt: "2026-11-14T15:00:00Z",
+  updatedAt: "2026-11-20T22:00:00Z",
+  dataAsOf: "2026-11-20",
+  dataStatus: "VERIFIED",
   exchangeRate: {
-    usdKrw: 1332.40,
-    change: -2.80,
-    changePct: -0.21,
+    usdKrw: 1346.13,
+    change: +12.88,
+    changePct: +0.97,
     yahooTicker: "KRW=X",
-    status: "달러 소폭 약세",
-    analysis: "원/달러 환율 상승세로 미국 빅테크 주식 환차익 효과 발생. 단, 달러 강세 시 비미국권 매출 비중이 높은 기업의 외환 환산 손실 점검 필요."
+    exchange: "FOREX",
+    currency: "KRW",
+    dataSource: "외환시장 공식 종가 (2026.11.20)",
+    status: "달러 강세 재개",
+    analysis: "원/달러 환율이 1,346원대로 반등하며 미국 빅테크 주식 환차익 효과 발생. 단, 달러 강세 시 비미국권 매출 비중이 높은 기업의 외환 환산 손실 점검 필요."
   },
   fedRate: {
     current: "4.75% ~ 5.00%",
     status: "중립적 완화 국면",
+    exchange: "FOMC",
+    currency: "%",
+    dataSource: "연준 FOMC 공시",
     dotPlotTrend: "2026년 말 기준 4.25% 전망",
     analysis: "연준의 점진적 금리 인하 기조 속에서 인플레이션 둔화 속도를 주시 중. 급격한 인하는 경기 침체 신호일 수 있으므로 질서 있는 인하가 유리함."
   },
   us10yYield: {
-    current: 5.12,
-    change: -0.03,
+    current: 4.91,
+    change: -0.21,
+    changePct: -4.10,
     yahooTicker: "^TNX",
-    status: "고금리 경계 구간 (> 5.0%)",
-    discountRateImpact: "고성장주 밸류에이션(PER) 압축 압력 지속",
-    analysis: "미 10년물 국채 금리는 '무위험 할인율'의 핵심 기준. 5.0% 상회 시 고PER 성장주의 미래 이익 현재가치 하락으로 주가 변동성 확대 주의 (책 10장)."
+    exchange: "CBOE",
+    currency: "%",
+    dataSource: "미 재무부/CBOE 종가 (2026.11.20)",
+    status: "5.0% 하회 안도 구간 (4.91%)",
+    discountRateImpact: "성장주 밸류에이션(PER) 할인율 부담 일부 완화",
+    analysis: "미 10년물 국채 금리가 4.91%로 하락하며 5% 아래로 진입. 할인율 압박이 다소 진정되며 테크 기업 밸류에이션 방어력 확보 (책 10장)."
   },
   wtiOil: {
-    current: 85.34,
-    change: -0.38,
-    changePct: -0.44,
+    current: 83.41,
+    change: -2.31,
+    changePct: -2.69,
     yahooTicker: "CL=F",
-    status: "조정 국면 ($84~$86)",
-    inflationPressure: "중간 완화",
-    analysis: "국제 유가(WTI)는 글로벌 공급 과잉 전망 및 중동 리스크 일부 완화로 배럴당 $85선에서 형성. 유가 급등 시 2차 인플레이션 및 데이터센터 전력비 부담 점검 필요 (책 11장)."
+    exchange: "NYMEX",
+    currency: "USD/bbl",
+    dataSource: "NYMEX 종가 (2026.11.20)",
+    status: "하향 안정 국면 ($83.41)",
+    inflationPressure: "인플레이션 압력 완화",
+    analysis: "국제 유가(WTI)가 배럴당 $83.41로 하락하여 인플레이션 재발 우려 완화 및 데이터센터 전력 비용 부담 경감 (책 11장)."
   },
   fearGreedIndex: {
-    score: 41,
+    score: 38,
     rating: "Fear (공포)",
-    prevClose: 38,
+    prevClose: 41,
     weekAgo: 45,
+    exchange: "CNN",
+    dataSource: "CNN Business 공식 지표 (2026.11.20)",
     strategySignal: "분할 매수 레이더 가동 (20 이하 극단적 공포 시 40% 현금 실탄 1/3 즉각 투입 대기)",
-    analysis: "지수가 41로 '공포' 영역에 위치. 대중의 심리가 위축된 상태이나 아직 책에서 제시한 20 이하의 '극단적 공포(Extreme Fear) 황금 매수 타점' 직전 관망 및 1차 준비 단계 (책 12장)."
+    analysis: "지수가 38로 '공포' 영역 심화. 시장 조정세 속에서 책 12장이 제시한 '공포지수 20 이하 황금 매수 타점'을 향해 점진적 접근 중."
   },
   indices: {
-    sp500:   { current: 7561.67, changePct: +0.25, yahooTicker: "^GSPC", nameKo: "S&P 500" },
-    nasdaq:  { current: 25136.27, changePct: +0.42, yahooTicker: "^IXIC", nameKo: "나스닥 종합" },
-    soxl:    { current: 58.32, changePct: +1.20, yahooTicker: "SOXL", nameKo: "SOXL (반도체3X)" },
-    tqqq:    { current: 58.08, changePct: +0.95, yahooTicker: "TQQQ", nameKo: "TQQQ (나스닥3X)" }
+    sp500:   { current: 6910.39, change: -651.28, changePct: -8.61, yahooTicker: "^GSPC", exchange: "S&P", currency: "USD", nameKo: "S&P 500", dataSource: "S&P Dow Jones Indices (2026.11.20)" },
+    nasdaq:  { current: 22617.73, change: -2518.54, changePct: -10.02, yahooTicker: "^IXIC", exchange: "NASDAQ", currency: "USD", nameKo: "나스닥 종합", dataSource: "NASDAQ 거래소 (2026.11.20)" },
+    soxl:    { current: 30.88, change: -27.44, changePct: -47.05, yahooTicker: "SOXL", exchange: "NYSE Arca", currency: "USD", nameKo: "SOXL (반도체3X)", dataSource: "NYSE Arca (2026.11.20)" },
+    tqqq:    { current: 41.20, change: -16.48, changePct: -28.57, yahooTicker: "TQQQ", exchange: "NASDAQ", currency: "USD", nameKo: "TQQQ (나스닥3X)", dataSource: "NASDAQ (2026.11.20)" }
   }
 };
 

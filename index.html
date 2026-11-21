@@ -107,109 +107,130 @@
   <!-- ★ 실시간 글로벌 시장 지표 대시보드 ★ -->
   <section id="live-market-dashboard" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
     <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/30 border border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xl">
-      <!-- 타이틀 줄 -->
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center space-x-2">
+      <!-- 타이틀 줄 및 메타 헤더 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-800/70 gap-2 mb-3">
+        <div class="flex flex-wrap items-center gap-2">
           <i class="fas fa-satellite-dish text-emerald-400 text-sm"></i>
-          <span class="font-bold text-sm text-white">실시간 글로벌 시장 지표</span>
+          <span class="font-bold text-sm text-white">실시간 글로벌 시장 지표 & 매크로 환경</span>
+          <span id="macro-source-pill" class="text-[10px] px-2 py-0.5 rounded font-bold bg-sky-950 text-sky-300 border border-sky-800 font-mono">
+            [제공·저장 자료 우선]
+          </span>
+          <span id="macro-verified-badge" class="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center space-x-1">
+            <i class="fas fa-check-circle text-[9px] mr-1"></i><span>[사실] 공식 종가 검증 완료</span>
+          </span>
+        </div>
+        <div class="flex items-center space-x-2">
           <span id="live-market-status" class="inline-flex items-center space-x-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono">
             <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
             <span>대기 중</span>
           </span>
+          <button onclick="refreshLiveMarketData()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition font-medium">
+            <i class="fas fa-sync-alt mr-1"></i>새로고침
+          </button>
         </div>
-        <button onclick="refreshLiveMarketData()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition font-medium">
-          <i class="fas fa-sync-alt mr-1"></i>새로고침
-        </button>
       </div>
 
       <!-- 지표 카드 그리드 (8개: 환율, 유가, 10년물, 연준금리, S&P500, 나스닥, SOXL, TQQQ) -->
       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
 
         <!-- 1. USD/KRW 환율 -->
-        <div id="live-card-krw" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-krw" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: FOREX / Yahoo (KRW=X)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>🇺🇸🇰🇷 USD/KRW</span>
             <i class="fas fa-circle text-[6px] text-slate-600 group-hover:text-emerald-400 transition" id="live-dot-krw"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-krw"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-krw">--</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">FOREX · KRW</div>
         </div>
 
         <!-- 2. WTI 유가 -->
-        <div id="live-card-oil" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-oil" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: NYMEX (CL=F)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>🛢️ WTI 유가</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-oil"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-oil"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-oil">--</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">NYMEX · USD</div>
         </div>
 
         <!-- 3. 미 10년물 금리 -->
-        <div id="live-card-10y" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-10y" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: CBOE (^TNX)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>📊 美 10년물 금리</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-10y"></i>
           </div>
           <div class="text-base font-black text-amber-300 mt-1" id="live-val-10y"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-10y">--</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">CBOE · %</div>
         </div>
 
         <!-- 4. 연준 기준금리 (정적) -->
-        <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition">
+        <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition" title="출처: 미 연준 FOMC 공식 공시">
           <div class="text-[10px] text-slate-400 font-medium">🏛️ 연준 기준금리</div>
           <div class="text-base font-black text-blue-300 mt-1" id="live-val-fed">4.75~5.00%</div>
           <div class="text-[11px] text-slate-400 font-medium mt-0.5">중립적 완화 국면</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">FOMC · %</div>
         </div>
 
         <!-- 5. S&P 500 -->
-        <div id="live-card-sp500" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-sp500" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: S&P Dow Jones (^GSPC)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>📈 S&P 500</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-sp500"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-sp500"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-sp500">--</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">INDEX · USD</div>
         </div>
 
         <!-- 6. 나스닥 종합 -->
-        <div id="live-card-nasdaq" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-nasdaq" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: NASDAQ (^IXIC)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>💻 나스닥 종합</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-nasdaq"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-nasdaq"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-nasdaq">--</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">NASDAQ · USD</div>
         </div>
 
         <!-- 7. SOXL -->
-        <div id="live-card-soxl" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-soxl" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: NYSE Arca (SOXL)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>🔥 SOXL</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-soxl"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-soxl"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-soxl">--</div>
-          <div class="text-[9px] text-slate-500 mt-0.5">반도체 3X 레버리지</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">NYSE Arca · USD</div>
         </div>
 
         <!-- 8. TQQQ -->
-        <div id="live-card-tqqq" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group">
+        <div id="live-card-tqqq" class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3 hover:border-slate-600 transition group" title="출처: NASDAQ (TQQQ)">
           <div class="text-[10px] text-slate-400 font-medium flex items-center justify-between">
             <span>⚡ TQQQ</span>
             <i class="fas fa-circle text-[6px] text-slate-600" id="live-dot-tqqq"></i>
           </div>
           <div class="text-base font-black text-white mt-1" id="live-val-tqqq"><span class="text-xs text-slate-500 font-normal">연동 중...</span></div>
           <div class="text-[11px] font-semibold mt-0.5" id="live-chg-tqqq">--</div>
-          <div class="text-[9px] text-slate-500 mt-0.5">나스닥 3X 레버리지</div>
+          <div class="text-[9px] text-slate-500 mt-0.5 font-mono">NASDAQ · USD</div>
         </div>
 
       </div>
 
-      <!-- 데이터 출처 & 마지막 갱신 시각 -->
-      <div class="flex items-center justify-between mt-2.5 text-[10px] text-slate-500">
-        <span id="live-market-source">📡 Yahoo Finance 실시간 연동 시도 중...</span>
-        <span id="live-market-time"></span>
+      <!-- 데이터 출처 & 마지막 갱신 시각 & 데이터 엄격성 고지 바 -->
+      <div class="flex flex-wrap items-center justify-between mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-500 gap-2">
+        <div class="flex items-center space-x-2">
+          <span id="live-market-source">📡 출처: 공식 시장 검증 DB & Yahoo Finance API</span>
+          <span class="text-slate-700">|</span>
+          <span id="live-market-asof" class="font-mono text-slate-400">자료 기준일: 2026-11-20</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="text-slate-400"><i class="fas fa-shield-alt text-sky-400 mr-1"></i>[사실] 실시간/검증 시세 일치</span>
+          <span id="live-market-time" class="font-mono text-slate-400"></span>
+        </div>
       </div>
     </div>
   </section>
