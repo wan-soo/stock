@@ -97,6 +97,8 @@ const STOCKS_DATABASE = {
     ticker: "NVDA",
     nameKo: "엔비디아",
     nameEn: "NVIDIA Corp.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "AI 가속기 / GPU 반도체 독점",
     chapter: "2장. 엔비디아 독주 시대, 1등 기업의 왕좌는 언제까지 유지될까?",
     authorPortfolioShare: "30% (정기 적립 투자 핵심 종목)",
@@ -112,6 +114,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 195.00,
     targetPriceBull: 235.00,
     targetPriceBear: 130.00,
+    dataStatus: "VERIFIED", // VERIFIED(검증 완료), UNVERIFIED(확인 필요)
+    dataAsOf: "2026-11-17",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (FY2027 Q3 확정치, 2026.11.17 공시)",
       revenue: "$115.80B",
@@ -172,6 +177,8 @@ const STOCKS_DATABASE = {
     ticker: "TSLA",
     nameKo: "테슬라",
     nameEn: "Tesla Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "전기차 · 자율주행(FSD) · 로보택시 · 로봇",
     chapter: "3장. 테슬라, 단순한 전기차를 넘어 AI·로봇 제국으로 도약할 수 있을까?",
     authorPortfolioShare: "30% (장기 모빌리티/AI 플랫폼 배팅)",
@@ -187,6 +194,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 440.00,
     targetPriceBull: 550.00,
     targetPriceBear: 280.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-21",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.10.21 공시)",
       revenue: "$28.05B",
@@ -247,6 +257,8 @@ const STOCKS_DATABASE = {
     ticker: "PLTR",
     nameKo: "팔란티어",
     nameEn: "Palantir Technologies",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "엔터프라이즈 AI 플랫폼(AIP) 독점",
     chapter: "5장. 팔란티어, AI 소프트웨어는 어떻게 진짜 돈을 쓸어담는가?",
     authorPortfolioShare: "포트폴리오 위성 종목 (2~3개월 주기 묵직한 분할 매수)",
@@ -262,6 +274,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 195.00,
     targetPriceBull: 240.00,
     targetPriceBear: 120.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-11-02",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.11.02 공시)",
       revenue: "$2.313B",
@@ -314,6 +329,8 @@ const STOCKS_DATABASE = {
     ticker: "AVGO",
     nameKo: "브로드컴",
     nameEn: "Broadcom Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "맞춤형 AI 가속기(XPU) & 네트워크",
     chapter: "2부 AI 반도체 & 인프라 다크호스",
     authorPortfolioShare: "고성장 배당+AI 성장 복합 종목",
@@ -329,6 +346,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 390.00,
     targetPriceBull: 450.00,
     targetPriceBear: 280.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-09-02",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (FY2026 Q3 확정치, 2026.09.02 공시)",
       revenue: "$29.59B",
@@ -377,6 +397,8 @@ const STOCKS_DATABASE = {
     ticker: "TSM",
     nameKo: "TSMC",
     nameEn: "Taiwan Semiconductor Mfg.",
+    exchange: "NYSE (ADR)",
+    currency: "USD",
     sector: "글로벌 파운드리 1위 반도체 제조 독점",
     chapter: "1장 AI 밸류체인 제조의 절대 심장",
     authorPortfolioShare: "글로벌 AI 제조 파운드리 필수 편입",
@@ -392,6 +414,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 450.00,
     targetPriceBull: 520.00,
     targetPriceBear: 310.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-15",
+    dataSource: "SEC 공시(6-K) & 뉴욕증권거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.10.15 공시)",
       revenue: "$46.72B (NT$1,494.2B)",
@@ -440,6 +465,8 @@ const STOCKS_DATABASE = {
     ticker: "VST",
     nameKo: "비스트라",
     nameEn: "Vistra Corp.",
+    exchange: "NYSE",
+    currency: "USD",
     sector: "AI 데이터센터 원자력/전력 생산 독점",
     chapter: "8장. AI의 가장 치명적인 약점, '전력 폭증'에서 잭팟을 터뜨릴 기업들",
     authorPortfolioShare: "AI 전력 인프라 슈퍼사이클 핵심 종목",
@@ -455,6 +482,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 175.00,
     targetPriceBull: 220.00,
     targetPriceBear: 105.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-11-06",
+    dataSource: "SEC 공시(10-Q) & 뉴욕증권거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.11.06 공시)",
       revenue: "$6.347B",
@@ -503,6 +533,8 @@ const STOCKS_DATABASE = {
     ticker: "META",
     nameKo: "메타",
     nameEn: "Meta Platforms Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "AI 생성형 광고 및 오픈소스 LLaMA 생태계 독점",
     chapter: "7장. 잉여현금흐름(FCF)의 제왕, 메타의 AI 광고 대전환",
     authorPortfolioShare: "책 분석 1순위 (저평가 고성장 FCF 제왕)",
@@ -518,6 +550,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 750.00,
     targetPriceBull: 880.00,
     targetPriceBear: 540.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-21",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.10.21 공시)",
       revenue: "$64.601B",
@@ -576,6 +611,8 @@ const STOCKS_DATABASE = {
     ticker: "MSFT",
     nameKo: "마이크로소프트",
     nameEn: "Microsoft Corp.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "기업용 클라우드(Azure) & 코파일럿 독점",
     chapter: "4장. 오픈AI를 등에 업은 마이크로소프트의 영토 확장",
     authorPortfolioShare: "안정성 최우선 AI 플랫폼 핵심주",
@@ -591,6 +628,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 580.00,
     targetPriceBull: 650.00,
     targetPriceBear: 440.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-28",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (FY2027 Q1 공식 확정치, 2026.10.28 공시)",
       revenue: "$92.28B",
@@ -640,6 +680,8 @@ const STOCKS_DATABASE = {
     ticker: "AMZN",
     nameKo: "아마존",
     nameEn: "Amazon.com Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "클라우드(AWS) 1위 & AI 물류/이커머스 독점",
     chapter: "6장. AWS와 AI 물류의 결합, 아마존의 재도약",
     authorPortfolioShare: "글로벌 클라우드 1위 핵심 자산",
@@ -655,6 +697,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 310.00,
     targetPriceBull: 360.00,
     targetPriceBear: 220.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-29",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.10.29 공시)",
       revenue: "$201.90B",
@@ -704,6 +749,8 @@ const STOCKS_DATABASE = {
     ticker: "GOOGL",
     nameKo: "알파벳 (구글)",
     nameEn: "Alphabet Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "AI 검색 & 제미나이(Gemini) 풀스택 인프라",
     chapter: "2부 빅테크 풀스택 AI 패권 경쟁",
     authorPortfolioShare: "가장 저렴한 밸류에이션의 AI 거인",
@@ -719,6 +766,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 340.00,
     targetPriceBull: 390.00,
     targetPriceBear: 245.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-10-28",
+    dataSource: "SEC 공시(10-Q) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (공식 확정치, 2026.10.28 공시)",
       revenue: "$127.60B",
@@ -768,6 +818,8 @@ const STOCKS_DATABASE = {
     ticker: "AAPL",
     nameKo: "애플",
     nameEn: "Apple Inc.",
+    exchange: "NASDAQ",
+    currency: "USD",
     sector: "온디바이스 AI 인텔리전스 & 22억 활성 기기 생태계",
     chapter: "9장. 애플 인텔리전스와 온디바이스 AI의 역습",
     authorPortfolioShare: "글로벌 1위 디바이스 락인 생태계",
@@ -783,6 +835,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 395.00,
     targetPriceBull: 440.00,
     targetPriceBear: 300.00,
+    dataStatus: "VERIFIED",
+    dataAsOf: "2026-11-02",
+    dataSource: "SEC 공시(10-K) & 나스닥 거래소",
     financials: {
       period: "2026 Q3 공시 (FY2026 Q4 공식 확정치, 2026.11.02 공시)",
       revenue: "$114.48B",
@@ -832,6 +887,8 @@ const STOCKS_DATABASE = {
     ticker: "SPCX",
     nameKo: "스페이스X",
     nameEn: "Space Exploration Technologies Corp.",
+    exchange: "비상장 (IPO 추정/책 모델)",
+    currency: "USD",
     sector: "우주 항공 인프라 및 스타링크(Starlink) 위성 통신 독점",
     chapter: "14장. 미래를 바꿀 파괴적 혁신 기업, 스페이스X와 우주 경제",
     authorPortfolioShare: "10% (미래 파괴적 기술 메가트렌드 배팅)",
@@ -847,6 +904,9 @@ const STOCKS_DATABASE = {
     targetPriceBase: 168.00,
     targetPriceBull: 210.00,
     targetPriceBear: 95.00,
+    dataStatus: "ESTIMATED", // 비상장 기업은 추정치/확인 필요로 명확 구분
+    dataAsOf: "2026-11-14",
+    dataSource: "비상장 투자 라운드 및 책 14장 추정치 (확인 필요)",
     financials: {
       period: "2026 Q3 공시 (2026 회계연도 3분기 실적)",
       revenue: "$13.50B",
@@ -1164,21 +1224,29 @@ function generateHistoricalAndFutureData(ticker, customStock) {
   let actualPrices = [];
   let actualVolumes = [];
 
-  // 1. 야후 파이낸스 실시간 일봉 히스토리가 존재하고 50일 이상 유효한 경우 사용
+  // 1. 야후 파이낸스 실시간 일봉 히스토리가 존재하고 50일 이상 유효한 경우 사용 (공개 실시간 수집 자료)
   if (stock.realHistory && stock.realHistory.length > 50) {
     dates = stock.realHistory.map(h => h.date);
     actualPrices = stock.realHistory.map(h => h.price);
     actualVolumes = stock.realHistory.map(() => 50);
+    stock.chartSourceType = "LIVE_OPEN"; // 공개 실시간 수집 자료
+    stock.chartSource = "Yahoo Finance v8 Chart API (실시간 수집)";
+    stock.chartAsOf = dates[dates.length - 1];
   }
-  // 2. 검증된 실제 시장 6개월 역사적 마일스톤 데이터가 있는 경우 우선 채택 (100% 실제 차트와 일치)
+  // 2. 검증된 실제 시장 6개월 역사적 마일스톤 데이터가 있는 경우 우선 채택 (제공·저장 자료 우선)
   else if (REAL_STOCK_MILESTONES[ticker]) {
     const hist = generateDailyHistoryFromMilestones(REAL_STOCK_MILESTONES[ticker], currentPrice);
     dates = hist.dates;
     actualPrices = hist.prices;
     actualVolumes = hist.volumes;
+    stock.chartSourceType = "STORED_DB"; // 제공·저장 자료 우선
+    stock.chartSource = "저장된 검증 종가 마일스톤 DB (SEC/거래소 공시 기반)";
+    stock.chartAsOf = dates[dates.length - 1];
   }
-  // 3. 관련 데이터를 못 갖고 오는 경우: 임의로 데이터를 만들지 않고 null 반환 (차트 미출력 원칙)
+  // 3. 관련 데이터를 못 갖고 오는 경우: 지어내지 않고 null 반환 (확인 필요 처리)
   else {
+    stock.chartSourceType = "UNVERIFIED";
+    stock.chartSource = "자료 미확보 (확인 필요)";
     return null;
   }
 

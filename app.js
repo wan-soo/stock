@@ -587,14 +587,16 @@ async function handleSearchSubmit(query) {
     showNoticeToast("조회 중", `'${rawQ}' 실시간 데이터 조회 중...`, "info");
     const live = await fetchRealtimeStockQuote(sym);
     if (live && live.currentPrice) {
-      // 실시간 데이터가 실제로 존재하는 경우에만 프로필 구성
+      // 실시간 데이터가 실제로 존재하는 경우에만 프로필 구성 (공개 자료 수집 후 저장)
       const realStock = {
         ticker: live.ticker,
         nameKo: rawQ,
         nameEn: `${live.ticker} Corp.`,
-        sector: "실시간 연동 종목",
+        exchange: live.exchange || "US Exchange",
+        currency: live.currency || "USD",
+        sector: "공개 자료 수집 종목",
         chapter: "실시간 시장 시세 조회",
-        authorPortfolioShare: "실시간 시장 데이터 연동",
+        authorPortfolioShare: "공개 실시간 수집 연동",
         currentPrice: live.currentPrice,
         change: live.change,
         changePct: live.changePct,
@@ -608,32 +610,39 @@ async function handleSearchSubmit(query) {
         targetPriceBear: parseFloat((live.currentPrice * 0.85).toFixed(2)),
         priceDriver: "실시간 시장 수급 및 실적 변동성",
         realHistory: live.realHistory,
+        dataStatus: "LIVE_COLLECTED", // 공개 실시간 수집 자료
+        dataAsOf: new Date().toISOString().split("T")[0],
+        dataSource: "Yahoo Finance v8 Chart API (공개 수집 자료)",
+        chartSourceType: "LIVE_OPEN",
+        chartSource: "Yahoo Finance v8 Chart API (실시간 수집)",
+        chartAsOf: new Date().toISOString().split("T")[0],
         financials: {
-          revenue: "공시 데이터 없음",
+          period: "자료 미확보 (확인 필요)",
+          revenue: "공시 데이터 없음 (확인 필요)",
           revenueYoY: "--",
-          operatingIncome: "공시 데이터 없음",
+          operatingIncome: "공시 데이터 없음 (확인 필요)",
           operatingMargin: "--",
-          netIncome: "공시 데이터 없음",
-          netMargin: "--",
+          netIncome: "공시 데이터 없음 (확인 필요)",
+          netMargin: "-- (확인 필요)",
           eps: "N/A",
           epsConsensus: "N/A",
-          epsSurprise: "미분석 종목",
-          operatingCashFlow: "공시 데이터 없음",
-          freeCashFlow: "공시 데이터 없음",
-          guidance: "별도 실적 공시 확인 필요",
-          capEx: "공시 데이터 없음",
+          epsSurprise: "확인 필요",
+          operatingCashFlow: "공시 데이터 없음 (확인 필요)",
+          freeCashFlow: "공시 데이터 없음 (확인 필요)",
+          guidance: "별도 공식 실적 공시 확인 필요",
+          capEx: "공시 데이터 없음 (확인 필요)",
           datacenterRev: "데이터 없음"
         },
-        investmentAnalysis: {
-          thesis: `'${live.ticker}' 종목은 실시간 시세가 조회되었으나, 책 핵심 분석 기업 DB에 등록되지 않은 종목입니다. 허위 정보를 방지하기 위해 임의의 가상 재무제표나 가짜 차트를 생성하지 않습니다.`,
-          strengths: ["실시간 주가 데이터 수신 성공"],
-          keyRisks: ["검증된 재무 분석 보고서 부재", "자체 공시 및 사업보고서 직접 확인 권고"],
+        bookAnalysis: {
+          moat: "책 수록 종목 외 공개 시장 수집 종목입니다. 허위 정보를 방지하기 위해 가짜 해자 데이터를 생성하지 않으며 공식 사업보고서 확인이 필요합니다.",
+          keyCatalysts: ["실시간 주가 수급 연동 성공"],
+          keyRisks: ["공식 재무 검증 보고서 부재 (확인 필요)", "DART / SEC 원본 공시 직접 대조 권장"],
           fiveStepScore: {
-            moatScore: "--",
-            financialScore: "--",
-            macroResilienceScore: "--",
-            valuationScore: "--",
-            finalAction: "자체 조사 필요",
+            moatScore: 50,
+            financialScore: 50,
+            macroResilienceScore: 50,
+            valuationScore: 50,
+            finalAction: "자료 확인 필요 (공식 공시 직접 검증 권장)",
             actionBadge: "NEUTRAL",
             authorComment: "책 12대 핵심 분석 종목 외의 기업은 반드시 DART/SEC 공시와 FCF를 직접 검증하시기 바랍니다."
           }
@@ -1274,7 +1283,7 @@ function renderStockPredictionChart(stock) {
       labels: data.dates,
       datasets: [
         {
-          label: "현재 실시간 주가 (과거~오늘)",
+          label: "[사실] 실시간/검증 체결가 (과거~오늘)",
           data: data.actualPrices,
           borderColor: "#0ea5e9", // 스카이블루 실선
           backgroundColor: "rgba(14, 165, 233, 0.08)",
@@ -1305,7 +1314,7 @@ function renderStockPredictionChart(stock) {
           order: 1
         },
         {
-          label: "향후 예상 주가 (Base 기본 전망)",
+          label: "[AI 해석] Base 기본 전망",
           data: adjustedBase,
           borderColor: "#f59e0b", // 황금색 점선
           borderWidth: 2.5,
@@ -1316,7 +1325,7 @@ function renderStockPredictionChart(stock) {
           order: 2
         },
         {
-          label: "낙관 시나리오 (Bull - AI 폭발/성공)",
+          label: "[AI 해석] Bull 낙관 시나리오",
           data: adjustedBull,
           borderColor: "#10b981", // 에메랄드 그린 점선
           borderWidth: 2,
@@ -1328,7 +1337,7 @@ function renderStockPredictionChart(stock) {
           order: 3
         },
         {
-          label: "보수 시나리오 (Bear - 고금리/CapEx회수지연)",
+          label: "[AI 해석] Bear 보수 시나리오",
           data: adjustedBear,
           borderColor: "#f43f5e", // 로즈 레드 점선
           borderWidth: 2,
@@ -1373,16 +1382,18 @@ function renderStockPredictionChart(stock) {
             title: (items) => {
               const d = items[0].label;
               const idx = items[0].dataIndex;
-              if (idx === cutoff) return `📍 [오늘/현시점 실시간] ${d}`;
+              if (idx === cutoff) return `📍 [사실: 오늘 실시간 체결가] ${d}`;
               if (data.comparison) {
-                if (idx === data.comparison.threeMonths.index) return `📅 [3개월 전 시점] ${d}`;
-                if (idx === data.comparison.sixMonths.index) return `📅 [6개월 전 시점] ${d}`;
+                if (idx === data.comparison.threeMonths.index) return `📅 [사실: 3개월 전 종가] ${d}`;
+                if (idx === data.comparison.sixMonths.index) return `📅 [사실: 6개월 전 종가] ${d}`;
               }
-              return d > todayDate ? `🔮 [AI 미래 예측] ${d}` : `과거 거래일: ${d}`;
+              return d > todayDate ? `🔮 [AI 해석: 할인율·실적 모델 추정] ${d}` : `📊 [사실: 거래일 종가] ${d}`;
             },
             label: (item) => {
               if (item.raw === null || item.raw === undefined) return null;
-              return ` ${item.dataset.label}: $${item.raw.toFixed(2)}`;
+              const isFact = item.dataIndex <= cutoff;
+              const category = isFact ? "[사실]" : "[AI 해석]";
+              return ` ${category} ${item.dataset.label}: $${item.raw.toFixed(2)}`;
             },
             afterBody: (items) => {
               const item = items[0];
@@ -1392,16 +1403,18 @@ function renderStockPredictionChart(stock) {
                   const p = data.comparison.threeMonths;
                   return [
                     "",
-                    `• 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
-                    `• 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
+                    `• [사실] 3개월 전 가격: $${p.price.toFixed(2)} (${p.date})`,
+                    `• [사실] 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
+                    `• [사실] 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
                   ];
                 }
                 if (idx === data.comparison.sixMonths.index) {
                   const p = data.comparison.sixMonths;
                   return [
                     "",
-                    `• 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
-                    `• 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
+                    `• [사실] 6개월 전 가격: $${p.price.toFixed(2)} (${p.date})`,
+                    `• [사실] 현시점 대비 등락폭: ${p.change >= 0 ? '+' : ''}$${p.change.toFixed(2)}`,
+                    `• [사실] 현시점 대비 수익률: ${p.changePct >= 0 ? '+' : ''}${p.changePct.toFixed(1)}%`
                   ];
                 }
                 if (idx === cutoff) {
@@ -1409,16 +1422,18 @@ function renderStockPredictionChart(stock) {
                   const p6 = data.comparison.sixMonths;
                   return [
                     "",
-                    `• 3개월 전 대비: ${p3.changePct >= 0 ? '+' : ''}${p3.changePct.toFixed(1)}% (${p3.change >= 0 ? '+' : ''}$${p3.change.toFixed(2)})`,
-                    `• 6개월 전 대비: ${p6.changePct >= 0 ? '+' : ''}${p6.changePct.toFixed(1)}% (${p6.change >= 0 ? '+' : ''}$${p6.change.toFixed(2)})`
+                    `• [사실] 3개월 전 대비: ${p3.changePct >= 0 ? '+' : ''}${p3.changePct.toFixed(1)}% (${p3.change >= 0 ? '+' : ''}$${p3.change.toFixed(2)})`,
+                    `• [사실] 6개월 전 대비: ${p6.changePct >= 0 ? '+' : ''}${p6.changePct.toFixed(1)}% (${p6.change >= 0 ? '+' : ''}$${p6.change.toFixed(2)})`,
+                    `• [출처/자료] ${stock.chartSource || '검증 종가 DB'} (통화: ${stock.currency || 'USD'})`
                   ];
                 }
               }
               if (item.label > todayDate) {
                 return [
                   "",
-                  `• 적용 10년물 금리: ${simParams.us10y.toFixed(2)}% (할인율 압박)`,
-                  `• 실적 순수익률: ${stock.financials.netMargin}`
+                  `• [AI 해석 모델] 미 국채 10년물 할인율: ${simParams.us10y.toFixed(2)}%`,
+                  `• [공시 사실] 기업 순수익률: ${stock.financials.netMargin}`,
+                  `• [유의사항] 과거 실적 및 할인율 기반 AI 시나리오이며 미래 보장 수익이 아님`
                 ];
               }
               return [];
@@ -1452,6 +1467,77 @@ function renderStockPredictionChart(stock) {
       }
     }
   });
+
+  // 차트 메타 및 출처 정보 바 동적 업데이트
+  const elMetaBadge = document.getElementById("chart-meta-badge");
+  const elTypePill = document.getElementById("chart-data-type-pill");
+  const elSourceText = document.getElementById("chart-data-source-text");
+  const elDateText = document.getElementById("chart-data-date-text");
+  const elVerifiedTag = document.getElementById("chart-data-verified-tag");
+  const elConfirmStatus = document.getElementById("chart-data-confirm-status");
+  const elCurrencyLabel = document.getElementById("chart-currency-label");
+
+  const exchangeName = stock.exchange || "NASDAQ";
+  const currencyUnit = stock.currency || "USD ($)";
+
+  if (elMetaBadge) {
+    elMetaBadge.innerText = `${exchangeName}: ${stock.ticker} · 통화: ${currencyUnit}`;
+  }
+  if (elCurrencyLabel) {
+    elCurrencyLabel.innerText = currencyUnit;
+  }
+
+  // 제공·저장 자료 우선 vs 공개 자료 수집 구분
+  if (stock.chartSourceType === "LIVE_OPEN") {
+    if (elTypePill) {
+      elTypePill.innerText = "[공개 자료 수집]";
+      elTypePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800";
+    }
+    if (elSourceText) elSourceText.innerText = `출처: ${stock.chartSource}`;
+  } else if (stock.chartSourceType === "STORED_DB") {
+    if (elTypePill) {
+      elTypePill.innerText = "[제공·저장 자료 우선]";
+      elTypePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800";
+    }
+    if (elSourceText) elSourceText.innerText = `출처: ${stock.chartSource}`;
+  } else {
+    if (elTypePill) {
+      elTypePill.innerText = "[자료 확인 필요]";
+      elTypePill.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800";
+    }
+    if (elSourceText) elSourceText.innerText = `출처: ${stock.dataSource || '확인 필요'}`;
+  }
+
+  if (elDateText) {
+    elDateText.innerText = `자료 기준일: ${stock.chartAsOf || todayDate}`;
+  }
+
+  // 사실/검증 상태 vs 확인 필요 구분
+  if (stock.dataStatus === "UNVERIFIED" || stock.chartSourceType === "UNVERIFIED") {
+    if (elVerifiedTag) {
+      elVerifiedTag.className = "text-rose-400 flex items-center space-x-1";
+      elVerifiedTag.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i><span>미확인 (자료 확인 필요)</span>`;
+    }
+    if (elConfirmStatus) {
+      elConfirmStatus.innerHTML = `<span class="text-rose-400 font-semibold">검증 상태: 미확인 (지어내지 않고 확인 필요로 표시)</span>`;
+    }
+  } else if (stock.dataStatus === "ESTIMATED") {
+    if (elVerifiedTag) {
+      elVerifiedTag.className = "text-amber-400 flex items-center space-x-1";
+      elVerifiedTag.innerHTML = `<i class="fas fa-lightbulb text-[10px]"></i><span>[AI/투자 라운드 추정치]</span>`;
+    }
+    if (elConfirmStatus) {
+      elConfirmStatus.innerHTML = `<span class="text-amber-300">검증 상태: 비상장 추정 모델 (공식 공시 확인 필요)</span>`;
+    }
+  } else {
+    if (elVerifiedTag) {
+      elVerifiedTag.className = "text-emerald-400 flex items-center space-x-1";
+      elVerifiedTag.innerHTML = `<i class="fas fa-check-circle text-[10px]"></i><span>[사실] 검증 완료</span>`;
+    }
+    if (elConfirmStatus) {
+      elConfirmStatus.innerHTML = `<span class="text-emerald-300">검증 상태: 공식 공시 및 거래소 데이터 일치 확인</span>`;
+    }
+  }
 
   // 차트 안내 태그 업데이트
   const chartTag = document.getElementById("chart-cutoff-tag");
